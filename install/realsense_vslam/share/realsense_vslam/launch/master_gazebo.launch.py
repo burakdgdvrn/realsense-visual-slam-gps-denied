@@ -1,0 +1,1 @@
+/home/burak/graduation_thesis/src/realsense-visual-slam-gps-denied/realsense_vslam/launch/master_gazebo.launch.py

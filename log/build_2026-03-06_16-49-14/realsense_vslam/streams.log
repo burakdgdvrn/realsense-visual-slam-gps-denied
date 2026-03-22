@@ -1,0 +1,24 @@
+[0.009s] Invoking command in '/home/burak/graduation_thesis/build/realsense_vslam': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/burak/install/robot_kol_description:/home/burak/install/arduinobot_py_examples:/home/burak/robot_kolv1/install/robot_kol_description:/opt/ros/humble /usr/bin/cmake --build /home/burak/graduation_thesis/build/realsense_vslam -- -j16 -l16
+[0.072s] Invoked command in '/home/burak/graduation_thesis/build/realsense_vslam' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/burak/install/robot_kol_description:/home/burak/install/arduinobot_py_examples:/home/burak/robot_kolv1/install/robot_kol_description:/opt/ros/humble /usr/bin/cmake --build /home/burak/graduation_thesis/build/realsense_vslam -- -j16 -l16
+[0.078s] Invoking command in '/home/burak/graduation_thesis/build/realsense_vslam': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/burak/install/robot_kol_description:/home/burak/install/arduinobot_py_examples:/home/burak/robot_kolv1/install/robot_kol_description:/opt/ros/humble /usr/bin/cmake --install /home/burak/graduation_thesis/build/realsense_vslam
+[0.082s] -- Install configuration: ""
+[0.084s] -- Execute custom install script
+[0.085s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/launch/master_gazebo.launch.py
+[0.086s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/launch/slam_rtabmap.launch.py
+[0.087s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/models/master_uav/model.sdf
+[0.087s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/ament_index/resource_index/package_run_dependencies/realsense_vslam
+[0.087s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/ament_index/resource_index/parent_prefix_path/realsense_vslam
+[0.087s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/environment/ament_prefix_path.sh
+[0.087s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/environment/ament_prefix_path.dsv
+[0.087s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/environment/path.sh
+[0.088s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/environment/path.dsv
+[0.088s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/local_setup.bash
+[0.088s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/local_setup.sh
+[0.088s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/local_setup.zsh
+[0.088s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/local_setup.dsv
+[0.088s] -- Symlinking: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/package.dsv
+[0.093s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/ament_index/resource_index/packages/realsense_vslam
+[0.093s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/cmake/realsense_vslamConfig.cmake
+[0.093s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/cmake/realsense_vslamConfig-version.cmake
+[0.094s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/package.xml
+[0.095s] Invoked command in '/home/burak/graduation_thesis/build/realsense_vslam' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/burak/install/robot_kol_description:/home/burak/install/arduinobot_py_examples:/home/burak/robot_kolv1/install/robot_kol_description:/opt/ros/humble /usr/bin/cmake --install /home/burak/graduation_thesis/build/realsense_vslam

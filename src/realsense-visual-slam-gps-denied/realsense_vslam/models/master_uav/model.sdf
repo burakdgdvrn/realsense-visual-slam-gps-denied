@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <model name="master_uav">
+    <link name="base_link">
+      <gravity>0</gravity>
+      <kinematic>1</kinematic> <pose>0 0 0 0 0 0</pose>
+
+      <visual name="base_link_visual">
+        <geometry><mesh><uri>model://iris_with_standoffs/meshes/iris.dae</uri></mesh></geometry>
+        <material><script><name>Gazebo/DarkGrey</name><uri>__default__</uri></script></material>
+      </visual>
+
+      <visual name="r0_v">
+        <pose>0.13 -0.22 0.023 0 0 0</pose>
+        <geometry><mesh><uri>model://iris_with_standoffs/meshes/iris_prop_ccw.dae</uri></mesh></geometry>
+        <material><script><name>Gazebo/Blue</name></script></material>
+      </visual>
+      <visual name="r1_v">
+        <pose>-0.13 0.2 0.023 0 0 0</pose>
+        <geometry><mesh><uri>model://iris_with_standoffs/meshes/iris_prop_ccw.dae</uri></mesh></geometry>
+        <material><script><name>Gazebo/DarkGrey</name></script></material>
+      </visual>
+      <visual name="r2_v">
+        <pose>0.13 0.22 0.023 0 0 0</pose>
+        <geometry><mesh><uri>model://iris_with_standoffs/meshes/iris_prop_cw.dae</uri></mesh></geometry>
+        <material><script><name>Gazebo/Blue</name></script></material>
+      </visual>
+      <visual name="r3_v">
+        <pose>-0.13 -0.2 0.023 0 0 0</pose>
+        <geometry><mesh><uri>model://iris_with_standoffs/meshes/iris_prop_cw.dae</uri></mesh></geometry>
+        <material><script><name>Gazebo/DarkGrey</name></script></material>
+      </visual>
+
+      <collision name="base_link_collision">
+        <pose>0 0 -0.08 0 0 0</pose>
+        <geometry><box><size>0.47 0.47 0.23</size></box></geometry>
+      </collision>
+
+      <sensor name="camera" type="depth">
+        <always_on>true</always_on>
+        <update_rate>30.0</update_rate>
+        <pose>0.22 0 0.0 0 0 0</pose>
+        <camera>
+          <horizontal_fov>1.50098</horizontal_fov>
+          <image><width>640</width><height>480</height><format>R8G8B8</format></image>
+          <clip><near>0.1</near><far>10.0</far></clip>
+        </camera>
+        <plugin name="camera_plugin" filename="libgazebo_ros_camera.so">
+          <ros>
+            <namespace>master</namespace>
+            <remapping>~/image_raw:=camera/image_raw</remapping>
+            <remapping>~/depth/image_raw:=camera/depth/image_raw</remapping>
+            <remapping>~/camera_info:=camera/camera_info</remapping>
+          </ros>
+          <camera_name>camera</camera_name>
+          <frame_name>realsense_link</frame_name>
+          <min_depth>0.1</min_depth>
+          <max_depth>10.0</max_depth>
+        </plugin>
+      </sensor>
+    </link>
+  </model>
+</sdf>

@@ -1,0 +1,9 @@
+/home/burak/graduation_thesis/build/realsense_vslam/CMakeFiles/uninstall.dir
+/home/burak/graduation_thesis/build/realsense_vslam/CMakeFiles/realsense_vslam_uninstall.dir
+/home/burak/graduation_thesis/build/realsense_vslam/CMakeFiles/test.dir
+/home/burak/graduation_thesis/build/realsense_vslam/CMakeFiles/edit_cache.dir
+/home/burak/graduation_thesis/build/realsense_vslam/CMakeFiles/rebuild_cache.dir
+/home/burak/graduation_thesis/build/realsense_vslam/CMakeFiles/list_install_components.dir
+/home/burak/graduation_thesis/build/realsense_vslam/CMakeFiles/install.dir
+/home/burak/graduation_thesis/build/realsense_vslam/CMakeFiles/install/local.dir
+/home/burak/graduation_thesis/build/realsense_vslam/CMakeFiles/install/strip.dir
