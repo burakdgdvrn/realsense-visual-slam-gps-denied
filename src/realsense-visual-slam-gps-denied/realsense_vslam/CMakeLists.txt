@@ -23,8 +23,9 @@ install(DIRECTORY
 )
 
 install(PROGRAMS
-  scripts/swarm_controller.py
-  scripts/custom_flight_engine.py
+  scripts/formation_controller.py
+  scripts/kinematic_physics.py
+  scripts/odom_broadcaster.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

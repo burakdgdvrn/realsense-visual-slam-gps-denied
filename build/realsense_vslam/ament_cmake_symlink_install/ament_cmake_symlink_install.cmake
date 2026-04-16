@@ -318,8 +318,8 @@ message(STATUS "Execute custom install script")
 # install(DIRECTORY "launch" "models" "worlds" "config" "DESTINATION" "share/realsense_vslam")
 ament_cmake_symlink_install_directory("/home/burak/graduation_thesis/src/realsense-visual-slam-gps-denied/realsense_vslam" DIRECTORY "launch" "models" "worlds" "config" "DESTINATION" "share/realsense_vslam")
 
-# install(PROGRAMS "scripts/swarm_controller.py" "scripts/custom_flight_engine.py" "DESTINATION" "lib/realsense_vslam")
-ament_cmake_symlink_install_programs("/home/burak/graduation_thesis/src/realsense-visual-slam-gps-denied/realsense_vslam" PROGRAMS "scripts/swarm_controller.py" "scripts/custom_flight_engine.py" "DESTINATION" "lib/realsense_vslam")
+# install(PROGRAMS "scripts/formation_controller.py" "scripts/kinematic_physics.py" "scripts/odom_broadcaster.py" "DESTINATION" "lib/realsense_vslam")
+ament_cmake_symlink_install_programs("/home/burak/graduation_thesis/src/realsense-visual-slam-gps-denied/realsense_vslam" PROGRAMS "scripts/formation_controller.py" "scripts/kinematic_physics.py" "scripts/odom_broadcaster.py" "DESTINATION" "lib/realsense_vslam")
 
 # install(FILES "/home/burak/graduation_thesis/build/realsense_vslam/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/realsense_vslam" "DESTINATION" "share/ament_index/resource_index/package_run_dependencies")
 ament_cmake_symlink_install_files("/home/burak/graduation_thesis/src/realsense-visual-slam-gps-denied/realsense_vslam" FILES "/home/burak/graduation_thesis/build/realsense_vslam/ament_cmake_index/share/ament_index/resource_index/package_run_dependencies/realsense_vslam" "DESTINATION" "share/ament_index/resource_index/package_run_dependencies")

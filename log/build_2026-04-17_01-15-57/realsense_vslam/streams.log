@@ -1,0 +1,30 @@
+[0.007s] Invoking command in '/home/burak/graduation_thesis/build/realsense_vslam': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/burak/graduation_thesis/build/realsense_vslam -- -j16 -l16
+[0.033s] Invoked command in '/home/burak/graduation_thesis/build/realsense_vslam' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/burak/graduation_thesis/build/realsense_vslam -- -j16 -l16
+[0.043s] Invoking command in '/home/burak/graduation_thesis/build/realsense_vslam': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/burak/graduation_thesis/build/realsense_vslam
+[0.050s] -- Install configuration: ""
+[0.050s] -- Execute custom install script
+[0.050s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/launch/flight_engine.launch.py
+[0.051s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/launch/master_gazebo.launch.py
+[0.051s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/launch/slam_rtabmap.launch.py
+[0.051s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/models/master_uav/model.sdf
+[0.051s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/models/slave_uav/model.sdf
+[0.051s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/worlds/vslam.world
+[0.051s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/lib/realsense_vslam/formation_controller.py
+[0.051s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/lib/realsense_vslam/kinematic_physics.py
+[0.051s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/lib/realsense_vslam/odom_broadcaster.py
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/ament_index/resource_index/package_run_dependencies/realsense_vslam
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/ament_index/resource_index/parent_prefix_path/realsense_vslam
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/environment/ament_prefix_path.sh
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/environment/ament_prefix_path.dsv
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/environment/path.sh
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/environment/path.dsv
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/local_setup.bash
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/local_setup.sh
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/local_setup.zsh
+[0.052s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/local_setup.dsv
+[0.052s] -- Symlinking: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/package.dsv
+[0.057s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/ament_index/resource_index/packages/realsense_vslam
+[0.057s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/cmake/realsense_vslamConfig.cmake
+[0.057s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/cmake/realsense_vslamConfig-version.cmake
+[0.057s] -- Up-to-date symlink: /home/burak/graduation_thesis/install/realsense_vslam/share/realsense_vslam/package.xml
+[0.058s] Invoked command in '/home/burak/graduation_thesis/build/realsense_vslam' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/burak/graduation_thesis/build/realsense_vslam
