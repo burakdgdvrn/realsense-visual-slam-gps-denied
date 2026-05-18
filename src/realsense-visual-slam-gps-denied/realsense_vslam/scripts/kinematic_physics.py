@@ -29,12 +29,12 @@ class KinematicPhysics(Node):
         v_yaw = pose_msg.orientation.y
         yaw = pose_msg.orientation.w
         
-        # Aerodinamik Animasyon
+        # Aerodinamik Animasyon (İptal edildi, çünkü kameranın haritayı eğik çıkarmasına sebep oluyor)
         pitch, roll = 0.0, 0.0
-        if v_x > 0.1: pitch = 0.15
-        elif v_x < -0.1: pitch = -0.15
-        if v_yaw > 0.1: roll = -0.15
-        elif v_yaw < -0.1: roll = 0.15
+        # if v_x > 0.1: pitch = 0.15
+        # elif v_x < -0.1: pitch = -0.15
+        # if v_yaw > 0.1: roll = -0.15
+        # elif v_yaw < -0.1: roll = 0.15
 
         req = SetEntityState.Request()
         req.state.name = name
