@@ -28,5 +28,12 @@ def generate_launch_description():
             name='odom_broadcaster',
             output='screen',
             parameters=[sim_time]
+        ),
+        Node(
+            package='realsense_vslam',
+            executable='hybrid_localizer.py',
+            name='hybrid_localizer',
+            output='screen',
+            parameters=[{'use_sim_time': True}]
         )
     ])
