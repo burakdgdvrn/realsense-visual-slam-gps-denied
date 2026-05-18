@@ -1,1 +1,0 @@
-/home/burak/graduation_thesis/build/realsense_vslam/ament_cmake_core/realsense_vslamConfig-version.cmake

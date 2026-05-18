@@ -1,1 +1,0 @@
-/home/burak/graduation_thesis/src/realsense-visual-slam-gps-denied/realsense_vslam/scripts/kinematic_physics.py
