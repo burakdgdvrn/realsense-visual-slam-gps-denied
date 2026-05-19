@@ -79,7 +79,7 @@ realsense_vslam/
 │   ├── master_uav/model.sdf     # Master drone with RGB-D depth camera
 │   └── slave_uav/model.sdf      # Slave drone (no camera, formation only)
 ├── worlds/
-│   └── vslam.world              # Custom 16x12m textured indoor warehouse
+│   └── vslam.world              # Custom 30x20m textured indoor warehouse
 ├── CMakeLists.txt
 └── package.xml
 ```
@@ -193,7 +193,7 @@ blended = lerp(vo_position, gps_position, α)
 
 ## 🌍 Test Environment
 
-Custom **16m × 12m enclosed indoor warehouse** designed for GPS-denied SLAM testing:
+Custom **30m × 20m enclosed indoor warehouse** designed for GPS-denied SLAM testing:
 
 - **Textured walls** — Brick and tile patterns for visual feature extraction
 - **Partition walls** — Create corridors and rooms for complex navigation
