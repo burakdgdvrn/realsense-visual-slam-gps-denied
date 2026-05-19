@@ -193,16 +193,13 @@ blended = lerp(vo_position, gps_position, α)
 
 ## 🌍 Test Environment
 
-Custom **30m × 20m enclosed indoor warehouse** designed for GPS-denied SLAM testing:
+The system utilizes the **ISCAS Museum** environment for GPS-denied SLAM testing:
 
-- **Textured walls** — Brick and tile patterns for visual feature extraction
-- **Partition walls** — Create corridors and rooms for complex navigation
-- **Pillars** — Rocky-textured SLAM landmarks at key positions
-- **Shelves & Crates** — Wood-pallet textured obstacles at various angles
-- **Barrels** — Cylindrical geometry for feature diversity
-- **Wall panels** — At drone flight height (1m) for direct camera visibility
+- **Rich Visual Features** — Highly textured exhibit halls, posters, and structures perfect for RTAB-Map Visual Odometry.
+- **Complex Navigation** — Provides a realistic indoor environment with corridors, open spaces, and varying lighting.
+- **Spacious Layout** — Large enough to accommodate the full V-formation swarm flight dynamics.
 
-All surfaces use Gazebo built-in textures to ensure RTAB-Map Visual Odometry can extract and track features during GPS-denied operation.
+The environment ensures RTAB-Map can extract and track robust visual features when GPS is disabled.
 
 ---
 

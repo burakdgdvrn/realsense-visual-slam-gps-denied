@@ -20,7 +20,7 @@ Spagetti kodu önlemek ve tezin mimari bölümünde rahatça anlatabilmek adına
 
 ### 3. Tek Drone SLAM ve Yeni Test Ortamı (World) Tasarımı
 * **Sorun:** Mevcut düz zeminli harita, Visual Odometry (VO) için "feature (özellik)" üretemiyordu.
-* **Çözüm:** SLAM'i tek araçta mükemmelleştirmek ve aynı zamanda sürü uçuşu (V-formasyonu) için geniş alan bırakmak adına `vslam.world` adlı 30x20m boyutlarında, tuğla duvarlı, ahşap koridorlu, sütunlu ve paletli/kutulu zengin bir depo (warehouse) ortamı tasarlandı. Gazebo'nun *built-in texture*'ları kullanılarak kameranın çok yüksek oranda görsel özellik (feature) yakalaması sağlandı. 
+* **Çözüm:** SLAM'i tek araçta mükemmelleştirmek ve aynı zamanda sürü uçuşu (V-formasyonu) için zengin feature sağlayan **ISCAS Museum** ortamı Gazebo dünyası olarak entegre edildi. Bu hazır ortam sayesinde kameranın çok yüksek oranda görsel özellik (feature) yakalaması sağlandı ve sürü rahatça uçabilecek alan buldu.
 * Bu ortamda tek araçla yapılan testlerde SLAM (Loop Closure) ve VO drift oranlarının çok kararlı olduğu doğrulandı.
 
 ### 4. GPS-Denied Geçiş Senaryosu (Hibrit Konumlandırma)

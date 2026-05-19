@@ -8,8 +8,15 @@ from launch_ros.actions import Node
 def generate_launch_description():
     pkg_share = get_package_share_directory('realsense_vslam')
     
-    # 1. Yarattığımız dünyayı değişkene atıyoruz
+    # 1. Yarattığımız yeni dünyayı değişkene atıyoruz
     world_file = os.path.join(pkg_share, 'worlds', 'vslam.world')
+
+    # Gazebo Model Path Ayarı
+    model_path = os.path.join(pkg_share, 'models')
+    if 'GAZEBO_MODEL_PATH' in os.environ:
+        os.environ['GAZEBO_MODEL_PATH'] += ':' + model_path
+    else:
+        os.environ['GAZEBO_MODEL_PATH'] = model_path
 
     # 2. Gazebo'yu başlatırken bu dünyayı kullanmasını söylüyoruz
     gazebo_ros_share = get_package_share_directory('gazebo_ros')
