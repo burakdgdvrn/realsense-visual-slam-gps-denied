@@ -35,5 +35,12 @@ def generate_launch_description():
             name='hybrid_localizer',
             output='screen',
             parameters=[{'use_sim_time': True}]
+        ),
+        Node(
+            package='realsense_vslam',
+            executable='metrics_recorder.py',
+            name='metrics_recorder',
+            output='screen',
+            parameters=[sim_time]
         )
     ])

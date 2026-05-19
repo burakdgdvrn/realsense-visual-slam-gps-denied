@@ -29,6 +29,8 @@ install(PROGRAMS
   scripts/hybrid_localizer.py
   scripts/automated_flight_test.py
   scripts/gps_jammer.py
+  scripts/metrics_recorder.py
+  scripts/fault_scenario.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
