@@ -79,7 +79,7 @@ realsense_vslam/
 │   ├── master_uav/model.sdf     # Master drone with RGB-D depth camera
 │   └── slave_uav/model.sdf      # Slave drone (no camera, formation only)
 ├── worlds/
-│   └── vslam.world              # Custom 30x20m textured indoor warehouse
+│   └── vslam.world              # Feature-rich ISCAS Museum environment for VO/SLAM
 ├── CMakeLists.txt
 └── package.xml
 ```
