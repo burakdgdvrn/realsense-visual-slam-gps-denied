@@ -246,7 +246,7 @@ The system records the following metrics to timestamped CSV files:
 
 ## 👤 Author
 
-**Burak Doğduviranlı**  
+**Burak Dağdeviren**  
 Graduation Thesis — 2026
 
 ---
