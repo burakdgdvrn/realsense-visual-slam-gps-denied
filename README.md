@@ -1,6 +1,6 @@
-# 🛰️ GPS-Denied Visual SLAM for Autonomous Drone Swarm Navigation
+# 🛰️ Evaluation of Visual Odometry Fallback for Leader-Follower Drone Formations in Kinematic GPS-Denied Simulations
 
-> **Graduation Thesis Project** — Autonomous Master-Slave drone swarm navigation using Visual SLAM in GPS-denied environments.
+> **Graduation Thesis Project** — Hybrid Localization Strategy for Kinematic UAV Leader-Follower Formations under Simulated GPS Outages.
 
 [![ROS2](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/)
 [![Gazebo](https://img.shields.io/badge/Gazebo-Classic%2011-orange)](http://gazebosim.org/)
@@ -11,15 +11,15 @@
 
 ## 📋 Overview
 
-This project demonstrates a **GPS-denied drone swarm navigation system** that seamlessly transitions between GPS-based and Vision-based localization. When a GPS signal is lost (e.g., due to jamming or indoor operation), the system automatically switches to **RTAB-Map Visual Odometry** to maintain autonomous flight and formation.
+This project demonstrates a **hybrid localization system** for leader-follower UAV formations that seamlessly transitions between GPS-based and Vision-based localization. When a GPS signal is lost, the system automatically switches to **RTAB-Map Visual Odometry** to maintain formation geometry.
 
 ### Key Features
 
 - **Hybrid Localization** — Automatic GPS ↔ Visual Odometry switching with smooth recovery
-- **V-Formation Swarm** — Master-Slave architecture with 1 master + 2 slave UAVs
-- **GPS Cyber-Attack Simulation** — Real-time GPS jamming/spoofing simulator
+- **Leader-Follower Formation** — Master-Slave architecture with 1 master + 2 slave UAVs
+- **Simulated GPS Outage** — Real-time GPS signal loss simulator
 - **Automated Test Scenarios** — Scripted fault-injection tests with metrics recording
-- **Publication-Quality Visualization** — Auto-generated trajectory plots and error analysis
+- **Academic Standard Metrics** — Auto-generated trajectory plots, ATE, RPE, and Yaw error analysis
 
 ---
 
@@ -42,7 +42,7 @@ This project demonstrates a **GPS-denied drone swarm navigation system** that se
 │                             │                                   │
 │  ┌──────────────┐    ┌──────▼───────────┐    ┌──────────────┐  │
 │  │  GPS Jammer  │───▶│   HYBRID         │◀───│  RTAB-Map    │  │
-│  │  (Cyber Atk) │    │   LOCALIZER      │    │  Visual Odom │  │
+│  │              │    │   LOCALIZER      │    │  Visual Odom │  │
 │  └──────────────┘    │  GPS↔VO Fusion   │    │  (rgbd_odom) │  │
 │                      └──────┬───────────┘    └──────────────┘  │
 │                             │                                   │
@@ -61,10 +61,10 @@ This project demonstrates a **GPS-denied drone swarm navigation system** that se
 realsense_vslam/
 ├── scripts/
 │   ├── hybrid_localizer.py      # Core: GPS/VO fusion with smooth recovery
-│   ├── formation_controller.py  # V-formation swarm control (state machine)
+│   ├── formation_controller.py  # V-formation control (state machine)
 │   ├── kinematic_physics.py     # Gazebo entity positioning via SetEntityState
 │   ├── odom_broadcaster.py      # Simulated GPS odometry publisher
-│   ├── gps_jammer.py            # Interactive GPS cyber-attack simulator
+│   ├── gps_jammer.py            # Interactive GPS outage simulator
 │   ├── automated_flight_test.py # 7-phase autonomous flight test
 │   ├── fault_scenario.py        # 9-phase GPS-denial fault injection test
 │   ├── metrics_recorder.py      # CSV logger for position error & mode transitions
@@ -72,7 +72,7 @@ realsense_vslam/
 ├── launch/
 │   ├── system_bringup.launch.py # Single entry point: Gazebo + Engine + SLAM
 │   ├── single_gazebo.launch.py  # Master-only Gazebo (for solo SLAM testing)
-│   ├── master_gazebo.launch.py  # Full swarm: Master + 2 Slaves
+│   ├── master_gazebo.launch.py  # Full formation: Master + 2 Slaves
 │   ├── flight_engine.launch.py  # Core nodes: control, physics, odom, localizer, metrics
 │   └── slam_rtabmap.launch.py   # RTAB-Map VO + SLAM + Visualization
 ├── models/
@@ -127,7 +127,7 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard \
     --ros-args -r /cmd_vel:=/master/cmd_vel
 ```
 
-**Terminal 3** — GPS jammer (press ENTER to toggle):
+**Terminal 3** — GPS Outage Simulator (press ENTER to toggle):
 ```bash
 ros2 run realsense_vslam gps_jammer.py
 ```
@@ -197,7 +197,7 @@ The system utilizes the **ISCAS Museum** environment for GPS-denied SLAM testing
 
 - **Rich Visual Features** — Highly textured exhibit halls, posters, and structures perfect for RTAB-Map Visual Odometry.
 - **Complex Navigation** — Provides a realistic indoor environment with corridors, open spaces, and varying lighting.
-- **Spacious Layout** — Large enough to accommodate the full V-formation swarm flight dynamics.
+- **Spacious Layout** — Large enough to accommodate the full V-formation flight geometry.
 
 The environment ensures RTAB-Map can extract and track robust visual features when GPS is disabled.
 
@@ -209,9 +209,10 @@ The system records the following metrics to timestamped CSV files:
 
 | Metric | Description |
 |--------|-------------|
-| **Position Error** | Euclidean distance between fused and GPS positions |
+| **ATE (Absolute Trajectory Error)** | Euclidean distance between fused and Ground Truth positions |
+| **RPE (Relative Pose Error)** | Error in translation and rotation between consecutive frames |
+| **Yaw Error** | Angular deviation from the ground truth orientation |
 | **Mode Transitions** | GPS → VO → RECOVERY → GPS event timestamps |
-| **Formation Error** | Slave deviation from expected formation position |
 | **Trajectory** | Full XY position trace with mode color coding |
 
 ---
@@ -232,12 +233,13 @@ The system records the following metrics to timestamped CSV files:
 
 ---
 
-## 📝 Notes
+## 📝 Notes & Limitations
 
-- This system uses a **kinematic simulation approach** for upper-level coordination validation rather than low-level flight dynamics modeling
-- The drone model uses `<kinematic>1</kinematic>` with gravity disabled for deterministic positioning
-- Aerodynamic tilt animations are disabled to prevent SLAM map distortion
-- The depth camera simulates an **Intel RealSense** sensor (640×480, 30 FPS, 86° FOV, 0.1-10m range)
+- This system uses a **kinematic simulation approach** for upper-level coordination validation rather than low-level flight dynamics modeling. Therefore, Visual Odometry drift may be more optimistic than in a physical environment with wind, vibration, and motion blur.
+- The drone model uses `<kinematic>1</kinematic>` with gravity disabled for deterministic positioning.
+- The term "Formation" (and legacy `/swarm/` topics) refers strictly to a **rigid leader-follower geometric coupling**, not a distributed multi-agent cooperative SLAM system.
+- Aerodynamic tilt animations are disabled to prevent SLAM map distortion.
+- The depth camera simulates an **Intel RealSense** sensor (640×480, 30 FPS, 86° FOV, 0.1-10m range).
 
 ---
 
