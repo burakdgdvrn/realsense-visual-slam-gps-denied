@@ -2,14 +2,19 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool
+from rclpy.qos import QoSProfile, DurabilityPolicy
 
 class GpsJammer(Node):
     def __init__(self):
         super().__init__('gps_jammer')
-        self.publisher_ = self.create_publisher(Bool, '/system/gps_status', 10)
+        qos_profile = QoSProfile(
+            depth=10,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL
+        )
+        self.publisher_ = self.create_publisher(Bool, '/system/gps_status', qos_profile)
         
         print("========================================")
-        print("  🛰️  GPS SİBER SALDIRI SİMÜLATÖRÜ  🛰️")
+        print("  🛰️  GPS KESİNTİ (OUTAGE) SİMÜLATÖRÜ  🛰️")
         print("========================================")
         print("[ENTER] tuşuna basarak GPS'i KES / GERİ GETİR")
         print("Çıkmak için CTRL+C")
@@ -48,7 +53,7 @@ def main(args=None):
                 if node.gps_active:
                     node.get_logger().info("🟢 GPS SİNYALİ GERİ GELDİ!")
                 else:
-                    node.get_logger().error("🔴 SİBER SALDIRI: GPS SİNYALİ KESİLDİ!")
+                    node.get_logger().error("🔴 GPS SİNYALİ KESİLDİ (SİMÜLE EDİLEN KESİNTİ)!")
                 node.publish_status()
             except (EOFError, KeyboardInterrupt):
                 break

@@ -30,24 +30,27 @@ def generate_launch_description():
     master_model_path = os.path.join(pkg_share, 'models', 'master_uav', 'model.sdf')
     slave_model_path = os.path.join(pkg_share, 'models', 'slave_uav', 'model.sdf')
 
+    # Spawn pozisyonları formation_controller'ın başlangıç durumu ile eşleşmeli!
+    # formation_controller: m_x=0, m_y=0, m_yaw=0, m_z=0 (GROUND state)
+    # V-formasyon (yaw=0): slave1=(-1, +1), slave2=(-1, -1)
     spawn_master = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-entity', 'master_uav', '-file', master_model_path, '-x', '0.0', '-y', '0.0', '-z', '1.0'],
+        arguments=['-entity', 'master_uav', '-file', master_model_path, '-x', '0.0', '-y', '0.0', '-z', '0.0'],
         output='screen'
     )
 
     spawn_slave1 = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-entity', 'slave_uav_1', '-file', slave_model_path, '-x', '-1.0', '-y', '1.0', '-z', '1.0'],
+        arguments=['-entity', 'slave_uav_1', '-file', slave_model_path, '-x', '-1.0', '-y', '1.0', '-z', '0.0'],
         output='screen'
     )
 
     spawn_slave2 = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-entity', 'slave_uav_2', '-file', slave_model_path, '-x', '1.0', '-y', '1.0', '-z', '1.0'],
+        arguments=['-entity', 'slave_uav_2', '-file', slave_model_path, '-x', '-1.0', '-y', '-1.0', '-z', '0.0'],
         output='screen'
     )
 

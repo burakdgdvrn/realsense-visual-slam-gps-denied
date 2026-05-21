@@ -20,6 +20,7 @@ class FormationController(Node):
         self.get_logger().info('Sürü Yerde Bekliyor. Kalkış için ileri komutu (i) verin.')
 
         self.v_x, self.v_yaw = 0.0, 0.0
+        # Başlangıç pozisyonu — Gazebo spawn noktası ile eşleşmeli!
         self.m_x, self.m_y, self.m_yaw, self.m_z = 0.0, 0.0, 0.0, 0.0
 
         self.timer = self.create_timer(1.0/30.0, self.update_formation)

@@ -7,9 +7,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 def generate_launch_description():
     pkg_share = get_package_share_directory('realsense_vslam')
     
-    # 1. Gazebo'yu başlat (Sadece Master Drone)
+    # 1. Gazebo'yu başlat (Master + 2 Slave Sürüsü)
     gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(pkg_share, 'launch', 'single_gazebo.launch.py'))
+        PythonLaunchDescriptionSource(os.path.join(pkg_share, 'launch', 'master_gazebo.launch.py'))
     )
     
     # 2. Fizik, Kontrol ve Odom motorlarını başlat

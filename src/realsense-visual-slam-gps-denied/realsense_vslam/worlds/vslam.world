@@ -1,22 +1,70 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <world name="default">
+  <world name="vslam_museum_world">
+    
+    <!-- HOMOJEN VE GÖLGESİZ IŞIKLANDIRMA -->
+    <!-- Shadows are disabled to prevent VO from tracking moving shadows -->
+    <scene>
+      <ambient>0.7 0.7 0.7 1.0</ambient>
+      <background>0.3 0.7 0.9 1.0</background>
+      <shadows>false</shadows>
+    </scene>
     <include>
       <uri>model://sun</uri>
     </include>
-    <include>
-      <uri>model://ground_plane</uri>
-    </include>
-    <plugin name="gazebo_ros_factory" filename="libgazebo_ros_factory.so"/>
-    <plugin name="gazebo_ros_init" filename="libgazebo_ros_init.so"/>
-    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
-      <ros>
-        <namespace>/gazebo</namespace>
-      </ros>
-    </plugin>
+    
+    <!-- ÇOK YÖNLÜ EK IŞIKLAR (Museum iç mekanı için) -->
+    <light type="directional" name="fill_light_1">
+      <pose>0 0 15 0 0 0</pose>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>-0.5 0.5 -1</direction>
+      <cast_shadows>false</cast_shadows>
+    </light>
+    <light type="directional" name="fill_light_2">
+      <pose>0 0 15 0 0 0</pose>
+      <diffuse>0.4 0.4 0.4 1</diffuse>
+      <specular>0.1 0.1 0.1 1</specular>
+      <direction>0.5 -0.5 -1</direction>
+      <cast_shadows>false</cast_shadows>
+    </light>
+
+    <!-- ZEMİN (Museum modeli kendi zeminini içeriyor, ama yedek olarak ekliyoruz) -->
+    <model name="ground_plane">
+      <static>true</static>
+      <pose>0 0 -0.01 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>100 100</size></plane></geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/CeilingTiled</name>
+            </script>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ============================================== -->
+    <!-- ISCAS MUSEUM — Zengin Dokulu İç Mekan Ortamı   -->
+    <!-- Visual Odometry için mükemmel feature kaynağı  -->
+    <!-- Duvarlar, tablolar, sütunlar, heykeller var    -->
+    <!-- ============================================== -->
     <include>
       <uri>model://iscas_museum</uri>
       <pose>0 0 0 0 0 0</pose>
+      <static>true</static>
     </include>
+
+    <!-- ROS ve Gazebo Eklentileri -->
+    <plugin name="gazebo_ros_factory" filename="libgazebo_ros_factory.so"/>
+    <plugin name="gazebo_ros_init" filename="libgazebo_ros_init.so"/>
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <ros><namespace>/gazebo</namespace></ros>
+    </plugin>
   </world>
 </sdf>

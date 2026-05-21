@@ -20,6 +20,7 @@ import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
+from rclpy.qos import QoSProfile, DurabilityPolicy
 import time
 
 
@@ -27,7 +28,13 @@ class FaultScenario(Node):
     def __init__(self):
         super().__init__('fault_scenario')
         self.cmd_pub = self.create_publisher(Twist, '/master/cmd_vel', 10)
-        self.gps_pub = self.create_publisher(Bool, '/system/gps_status', 10)
+        
+        # İlk mesajın kaçmaması için (Latching) QoS Profili
+        qos_profile = QoSProfile(
+            depth=10,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL
+        )
+        self.gps_pub = self.create_publisher(Bool, '/system/gps_status', qos_profile)
 
         # Başlangıçta GPS aktif
         self.set_gps(True)
@@ -74,7 +81,7 @@ class FaultScenario(Node):
         # ===== FAZA 3: GPS KESİNTİSİ =====
         self.get_logger().info('')
         self.get_logger().info('🔴' * 25)
-        self.get_logger().info('🔴  SİBER SALDIRI: GPS SİNYALİ KESİLİYOR!  🔴')
+        self.get_logger().info('🔴  SİMÜLE EDİLEN KESİNTİ: GPS SİNYALİ KOPARILIYOR!  🔴')
         self.get_logger().info('🔴' * 25)
         self.get_logger().info('')
         self.set_gps(False)

@@ -30,10 +30,11 @@ def generate_launch_description():
     master_model_path = os.path.join(pkg_share, 'models', 'master_uav', 'model.sdf')
 
     # Sadece Master İHA'yı haritaya ekliyoruz (Slave'ler yok)
+    # Spawn pozisyonu formation_controller ile eşleşmeli (GROUND state: z=0)
     spawn_master = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-entity', 'master_uav', '-file', master_model_path, '-x', '0.0', '-y', '0.0', '-z', '1.0'],
+        arguments=['-entity', 'master_uav', '-file', master_model_path, '-x', '0.0', '-y', '0.0', '-z', '0.0'],
         output='screen'
     )
 
