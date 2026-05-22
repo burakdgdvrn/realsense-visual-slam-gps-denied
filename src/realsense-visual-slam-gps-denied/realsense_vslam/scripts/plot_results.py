@@ -7,7 +7,7 @@ Test Sonuçları Grafik Üretici — Tez Sonuçlar Bölümü İçin (Akademik St
   2. ATE (Absolute Trajectory Error) Zaman Serisi
   3. RPE (Relative Pose Error) Zaman Serisi
   4. Mod Geçişleri Zaman Çizelgesi
-  5. GPS vs Füzyon X-Y Karşılaştırması
+  5. Ground Truth vs Tahmin X-Y Karşılaştırması
   6. Yaw Error Zaman Serisi
   7. İstatistik Özet Tablosu (ayrı grafik)
 
@@ -144,7 +144,7 @@ def plot_trajectory(ax, data):
         idx = [i for i, m in enumerate(modes) if m == mode]
         if idx:
             ax.scatter([fx[i] for i in idx], [fy[i] for i in idx],
-                      c=color, s=8, alpha=0.7, label=f'Füzyon ({mode})', zorder=3)
+                      c=color, s=8, alpha=0.7, label=f'Tahmin ({mode})', zorder=3)
 
     ax.plot(gx, gy, color='#ffffff', linewidth=1, alpha=0.3, linestyle='--', label='Ground Truth')
 
@@ -172,7 +172,7 @@ def plot_ate(ax, data, events):
         idx = [i for i, m in enumerate(modes) if m == mode]
         if idx:
             ax.scatter([t[i] for i in idx], [err_fused[i] for i in idx],
-                      c=color, s=4, alpha=0.8, label=f'Füzyon ATE ({mode})')
+                      c=color, s=4, alpha=0.8, label=f'Tahmin ATE ({mode})')
 
     add_gps_loss_zones(ax, events)
 
@@ -250,21 +250,21 @@ def plot_mode_timeline(ax, data, events):
 
 
 def plot_xy_comparison(ax, data, events):
-    """Grafik 5: GPS vs Füzyon X-Y Karşılaştırması"""
+    """Grafik 5: Ground Truth vs Tahmin X-Y Karşılaştırması"""
     t = data['timestamp']
     fx, fy = data['fused_x'], data['fused_y']
     gx, gy = data['gt_x'], data['gt_y']
 
     ax.plot(t, gx, color='#2ecc71', linewidth=1, alpha=0.6, label='Ground Truth X')
-    ax.plot(t, fx, color='#e74c3c', linewidth=1, alpha=0.8, label='Füzyon X')
+    ax.plot(t, fx, color='#e74c3c', linewidth=1, alpha=0.8, label='Tahmin X')
     ax.plot(t, gy, color='#27ae60', linewidth=1, alpha=0.6, linestyle='--', label='Ground Truth Y')
-    ax.plot(t, fy, color='#c0392b', linewidth=1, alpha=0.8, linestyle='--', label='Füzyon Y')
+    ax.plot(t, fy, color='#c0392b', linewidth=1, alpha=0.8, linestyle='--', label='Tahmin Y')
 
     add_gps_loss_zones(ax, events)
 
     ax.set_xlabel('Zaman (s)')
     ax.set_ylabel('Pozisyon (m)')
-    ax.set_title('Ground Truth vs Füzyon Pozisyon Karşılaştırması')
+    ax.set_title('Ground Truth vs Tahmin Pozisyon Karşılaştırması')
     ax.legend(loc='best', fontsize=8, facecolor='#1a1a2e', edgecolor=GRID_COLOR)
     ax.grid(True)
 
@@ -416,7 +416,7 @@ def main():
 
     # --- ANA FİGÜR: 6 grafik + 1 tablo ---
     fig = plt.figure(figsize=(20, 24))
-    fig.suptitle('GPS-Denied Visual SLAM — Akademik Test Sonuçları', y=0.98, fontsize=18)
+    fig.suptitle('GPS/VO Anahtarlamalı Lokalizasyon — Akademik Test Sonuçları', y=0.98, fontsize=18)
 
     # 3x2 grid + alt kısımda tablo
     gs = fig.add_gridspec(4, 2, hspace=0.35, wspace=0.3,
