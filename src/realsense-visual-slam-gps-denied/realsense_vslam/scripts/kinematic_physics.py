@@ -9,9 +9,9 @@ class KinematicPhysics(Node):
     def __init__(self):
         super().__init__('kinematic_physics')
         
-        self.sub_m = self.create_subscription(Pose, '/swarm/master_target', self.master_cb, 10)
-        self.sub_s1 = self.create_subscription(Pose, '/swarm/slave1_target', self.s1_cb, 10)
-        self.sub_s2 = self.create_subscription(Pose, '/swarm/slave2_target', self.s2_cb, 10)
+        self.sub_m = self.create_subscription(Pose, '/formation/master_target', self.master_cb, 10)
+        self.sub_s1 = self.create_subscription(Pose, '/formation/slave1_target', self.s1_cb, 10)
+        self.sub_s2 = self.create_subscription(Pose, '/formation/slave2_target', self.s2_cb, 10)
         
         self.cli = self.create_client(SetEntityState, '/gazebo/set_entity_state')
         while not self.cli.wait_for_service(timeout_sec=1.0):

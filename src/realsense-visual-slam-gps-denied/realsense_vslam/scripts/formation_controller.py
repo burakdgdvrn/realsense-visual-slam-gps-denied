@@ -11,9 +11,9 @@ class FormationController(Node):
         self.sub_cmd = self.create_subscription(Twist, '/master/cmd_vel', self.cmd_cb, 10)
         
         # Hedef pozisyonları yayınlayacağımız kanallar
-        self.pub_master = self.create_publisher(Pose, '/swarm/master_target', 10)
-        self.pub_slave1 = self.create_publisher(Pose, '/swarm/slave1_target', 10)
-        self.pub_slave2 = self.create_publisher(Pose, '/swarm/slave2_target', 10)
+        self.pub_master = self.create_publisher(Pose, '/formation/master_target', 10)
+        self.pub_slave1 = self.create_publisher(Pose, '/formation/slave1_target', 10)
+        self.pub_slave2 = self.create_publisher(Pose, '/formation/slave2_target', 10)
 
         # Durum Makinesi (State Machine): GROUND -> TAKEOFF -> HOVER -> FLYING
         self.state = 'GROUND'

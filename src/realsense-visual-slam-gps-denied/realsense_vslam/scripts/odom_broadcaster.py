@@ -9,7 +9,7 @@ import random
 class GpsBroadcaster(Node):
     def __init__(self):
         super().__init__('gps_broadcaster')
-        self.sub = self.create_subscription(Pose, '/swarm/master_target', self.odom_cb, 10)
+        self.sub = self.create_subscription(Pose, '/formation/master_target', self.odom_cb, 10)
         # ARTİK SADECE GPS YAYINLIYOR, TF YAYINLAMAYACAK
         self.odom_pub = self.create_publisher(Odometry, '/master/gps_odom', 10)
         

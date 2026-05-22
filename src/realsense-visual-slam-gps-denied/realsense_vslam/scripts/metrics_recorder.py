@@ -3,7 +3,7 @@
 Metrik Kayıt Sistemi — Tez Sonuçları İçin Veri Toplayıcı (Akademik Standart)
 
 Kaydedilen Metrikler:
-  - ATE (Absolute Trajectory Error): Füzyon konumu vs Ground Truth Öklid mesafesi
+  - ATE (Absolute Trajectory Error): Tahmin konumu vs Ground Truth Öklid mesafesi
   - RPE (Relative Pose Error): Ardışık frameler arası pose değişim hatası
   - GPS ATE: Gürültülü GPS vs Ground Truth Öklid mesafesi
   - Yaw Hatası: Açısal sapma (rad)
@@ -91,7 +91,7 @@ class MetricsRecorder(Node):
         self.create_subscription(Odometry, '/master/gps_odom', self.gps_odom_cb, 10)
         self.create_subscription(String, '/system/localization_mode', self.mode_cb, 10)
         self.create_subscription(Bool, '/system/gps_status', self.gps_status_cb, 10)
-        self.create_subscription(Pose, '/swarm/master_target', self.master_pose_cb, 10)
+        self.create_subscription(Pose, '/formation/master_target', self.master_pose_cb, 10)
 
         # --- Timer: Her 0.5 saniyede kayıt ---
         self.create_timer(0.5, self.record_metrics)
