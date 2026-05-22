@@ -22,7 +22,7 @@ def generate_launch_description():
     odom_params = base_params.copy()
     odom_params.update({
         # TF Yayını: odom → base_link
-        # Bu artık TEK kaynak — hybrid_localizer TF yayınlamıyor.
+        # Bu artık TEK kaynak — gps_vo_switcher TF yayınlamıyor.
         'publish_tf': True,
         'odom_frame_id': 'odom',
         
@@ -79,8 +79,8 @@ def generate_launch_description():
         ),
         
         # 2. GÖRSEL ODOMETRİ (VO) MOTORU
-        # TF zinciri: odom → base_link (TEK KAYNAK — hybrid_localizer artık TF yayınlamıyor)
-        # GPS kesildiğinde hybrid_localizer bu /rtabmap/vo topic'ini okuyarak füzyon yapacak.
+        # TF zinciri: odom → base_link (TEK KAYNAK — gps_vo_switcher TF yayınlamıyor)
+        # GPS kesildiğinde gps_vo_switcher bu /rtabmap/vo topic'ini okuyarak kaynak değiştirecek.
         Node(
             package='rtabmap_odom', 
             executable='rgbd_odometry', 
@@ -91,7 +91,7 @@ def generate_launch_description():
         
         # 3. HARİTACI (RTAB-Map SLAM)
         # TF zinciri: map → odom
-        # Kendi bağımsız VO'sunu (/rtabmap/vo) kullanır — füzyon çıktısına bağımlı DEĞİL.
+        # Kendi bağımsız VO'sunu (/rtabmap/vo) kullanır — switcher çıktısına bağımlı DEĞİL.
         Node(
             package='rtabmap_slam', 
             executable='rtabmap', 

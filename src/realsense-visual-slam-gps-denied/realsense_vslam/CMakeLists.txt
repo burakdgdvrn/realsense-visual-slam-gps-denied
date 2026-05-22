@@ -25,11 +25,9 @@ install(PROGRAMS
   scripts/formation_controller.py
   scripts/kinematic_physics.py
   scripts/odom_broadcaster.py
-  scripts/hybrid_localizer.py
-  scripts/automated_flight_test.py
-  scripts/gps_jammer.py
+  scripts/gps_vo_switcher.py
+  scripts/gps_outage_sim.py
   scripts/metrics_recorder.py
-  scripts/fault_scenario.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

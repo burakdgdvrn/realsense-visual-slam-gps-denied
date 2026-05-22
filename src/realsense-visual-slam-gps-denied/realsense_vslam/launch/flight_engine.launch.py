@@ -31,8 +31,8 @@ def generate_launch_description():
         ),
         Node(
             package='realsense_vslam',
-            executable='hybrid_localizer.py',
-            name='hybrid_localizer',
+            executable='gps_vo_switcher.py',
+            name='gps_vo_switcher',
             output='screen',
             parameters=[{'use_sim_time': True}]
         ),

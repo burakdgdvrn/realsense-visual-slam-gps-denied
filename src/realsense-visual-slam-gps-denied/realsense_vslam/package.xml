@@ -3,7 +3,7 @@
 <package format="3">
   <name>realsense_vslam</name>
   <version>0.0.0</version>
-  <description>Hybrid GPS/Visual Odometry localization with smooth recovery for leader-follower UAV formations in kinematic simulation</description>
+  <description>Priority-based GPS/Visual Odometry switching with smooth recovery for leader-follower UAV formations in kinematic simulation</description>
   <maintainer email="hburak.dgdvrn@gmail.com">burak</maintainer>
   <license>MIT</license>
 
