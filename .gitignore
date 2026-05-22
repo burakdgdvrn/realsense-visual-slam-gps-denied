@@ -5,3 +5,7 @@ __pycache__/
 *.pyc
 .colcon/
 test_results/
+
+# Frame tree visualizations
+frames_*.gv
+frames_*.pdf
