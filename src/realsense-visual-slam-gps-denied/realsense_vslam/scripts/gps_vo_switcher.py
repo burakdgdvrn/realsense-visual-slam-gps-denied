@@ -6,17 +6,24 @@ from std_msgs.msg import Bool, String
 import math
 import copy
 
-class HybridLocalizer(Node):
+class GpsVoSwitcher(Node):
+    """GPS/VO Öncelik Tabanlı Anahtarlama Düğümü (Priority-Based Switching)
+    
+    GPS aktifken GPS odometrisini, sinyal kesildiğinde Frame-to-Map Görsel
+    Odometriyi seçer. GPS geri geldiğinde lineer interpolasyon ile yumuşak
+    geçiş (smooth recovery) uygular. Kalman filtresi gibi istatistiksel
+    füzyon YAPILMAZ — kaynaklar arasında hakem (sensor arbitration) görevi görür.
+    """
     def __init__(self):
-        super().__init__('hybrid_localizer')
+        super().__init__('gps_vo_switcher')
         
         self.sub_gps = self.create_subscription(Odometry, '/master/gps_odom', self.gps_cb, 10)
         self.sub_vo = self.create_subscription(Odometry, '/rtabmap/vo', self.vo_cb, 10)
         self.sub_status = self.create_subscription(Bool, '/system/gps_status', self.status_cb, 10)
         
         # Sadece Odometry topic yayınla — TF YAYINLAMA!
-        # TF zinciri (odom→base_link) artık RTAB-Map rgbd_odometry tarafından yönetiliyor.
-        # Bu sayede RTAB-Map bağımsız ve tutarlı bir TF ağacına sahip oluyor.
+        # TF zinciri (odom→base_link) RTAB-Map rgbd_odometry tarafından yönetiliyor.
+        # Bu düğüm yalnızca konum kaynağını seçer (GPS veya VO), TF ağacına dokunmaz.
         self.pub_odom = self.create_publisher(Odometry, '/master/odom', 10)
         self.pub_mode = self.create_publisher(String, '/system/localization_mode', 10)
 
@@ -24,11 +31,11 @@ class HybridLocalizer(Node):
         self.last_gps_msg = None
         self.last_vo_msg = None
         
-        # Artık sadece mesafe değil, AÇI (Yaw) offseti de tutuyoruz
+        # GPS→VO geçişinde koordinat uzayı hizalaması (coordinate frame alignment) için offset
         self.offset_x, self.offset_y, self.offset_yaw = 0.0, 0.0, 0.0
         self.offset_calculated = False
 
-        # GPS geri geldiğinde yumuşak geçiş (smooth transition) için
+        # GPS geri geldiğinde yumuşak geçiş (smooth recovery / bumpless transfer) için
         self.recovering = False
         self.recovery_alpha = 0.0  # 0.0 = VO, 1.0 = GPS
         self.last_recovery_time = None
@@ -115,21 +122,21 @@ class HybridLocalizer(Node):
             cos_theta = math.cos(self.offset_yaw)
             sin_theta = math.sin(self.offset_yaw)
             
-            fused_x = (vo_x * cos_theta - vo_y * sin_theta) + self.offset_x
-            fused_y = (vo_x * sin_theta + vo_y * cos_theta) + self.offset_y
-            fused_yaw = vo_yaw + self.offset_yaw
+            estimated_x = (vo_x * cos_theta - vo_y * sin_theta) + self.offset_x
+            estimated_y = (vo_x * sin_theta + vo_y * cos_theta) + self.offset_y
+            estimated_yaw = vo_yaw + self.offset_yaw
 
-            qx, qy, qz, qw = self.get_quat(fused_yaw)
+            qx, qy, qz, qw = self.get_quat(estimated_yaw)
 
-            fused_odom = copy.deepcopy(msg)
-            fused_odom.pose.pose.position.x = fused_x
-            fused_odom.pose.pose.position.y = fused_y
-            fused_odom.pose.pose.orientation.x = qx
-            fused_odom.pose.pose.orientation.y = qy
-            fused_odom.pose.pose.orientation.z = qz
-            fused_odom.pose.pose.orientation.w = qw
+            out_odom = copy.deepcopy(msg)
+            out_odom.pose.pose.position.x = estimated_x
+            out_odom.pose.pose.position.y = estimated_y
+            out_odom.pose.pose.orientation.x = qx
+            out_odom.pose.pose.orientation.y = qy
+            out_odom.pose.pose.orientation.z = qz
+            out_odom.pose.pose.orientation.w = qw
 
-            self.publish_system_state(fused_odom)
+            self.publish_system_state(out_odom)
 
         elif self.recovering and self.last_gps_msg is not None:
             # --- YUMUŞAK GEÇİŞ: VO konumundan GPS konumuna yavaşça yakınsa (Yüksek frekanslı vo_cb içinde) ---
@@ -145,19 +152,19 @@ class HybridLocalizer(Node):
             vo_y = msg.pose.pose.position.y
             cos_theta = math.cos(self.offset_yaw)
             sin_theta = math.sin(self.offset_yaw)
-            vo_fused_x = (vo_x * cos_theta - vo_y * sin_theta) + self.offset_x
-            vo_fused_y = (vo_x * sin_theta + vo_y * cos_theta) + self.offset_y
-            vo_fused_yaw = vo_yaw + self.offset_yaw
+            vo_aligned_x = (vo_x * cos_theta - vo_y * sin_theta) + self.offset_x
+            vo_aligned_y = (vo_x * sin_theta + vo_y * cos_theta) + self.offset_y
+            vo_aligned_yaw = vo_yaw + self.offset_yaw
 
             # GPS konumu (En son gelen düşük frekanslı GPS mesajından)
             gps_x = self.last_gps_msg.pose.pose.position.x
             gps_y = self.last_gps_msg.pose.pose.position.y
             gps_yaw = self.get_yaw(self.last_gps_msg.pose.pose.orientation)
 
-            # İkisinin arasında interpolasyon yap (yavaşça GPS'e yakıns)
-            blended_x = self.lerp(vo_fused_x, gps_x, self.recovery_alpha)
-            blended_y = self.lerp(vo_fused_y, gps_y, self.recovery_alpha)
-            blended_yaw = self.slerp_yaw(vo_fused_yaw, gps_yaw, self.recovery_alpha)
+            # Yumuşak geçiş: VO konumundan GPS konumuna lineer interpolasyon
+            blended_x = self.lerp(vo_aligned_x, gps_x, self.recovery_alpha)
+            blended_y = self.lerp(vo_aligned_y, gps_y, self.recovery_alpha)
+            blended_yaw = self.slerp_yaw(vo_aligned_yaw, gps_yaw, self.recovery_alpha)
 
             qx, qy, qz, qw = self.get_quat(blended_yaw)
             
@@ -185,7 +192,7 @@ class HybridLocalizer(Node):
 
 def main():
     rclpy.init()
-    node = HybridLocalizer()
+    node = GpsVoSwitcher()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
