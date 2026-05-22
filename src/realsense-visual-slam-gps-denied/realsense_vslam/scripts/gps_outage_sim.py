@@ -4,9 +4,9 @@ from rclpy.node import Node
 from std_msgs.msg import Bool
 from rclpy.qos import QoSProfile, DurabilityPolicy
 
-class GpsJammer(Node):
+class GpsOutageSim(Node):
     def __init__(self):
-        super().__init__('gps_jammer')
+        super().__init__('gps_outage_sim')
         qos_profile = QoSProfile(
             depth=10,
             durability=DurabilityPolicy.TRANSIENT_LOCAL
@@ -40,7 +40,7 @@ class GpsJammer(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = GpsJammer()
+    node = GpsOutageSim()
     
     # Kendi input döngümüzü kuralım
     import threading
