@@ -1,4 +1,4 @@
-# Evaluation of Visual Odometry Fallback for Leader-Follower UAV Formations in Kinematic GPS-Denied Simulations
+# GPS/Visual Odometry Switching with Smooth Recovery for UAV Localization in Simulated GPS-Denied Environment
 
 > **Graduation Thesis Project** — GPS/Visual Odometry Switching with Smooth Recovery for Leader-Follower UAV Formations under Simulated GPS Outage Conditions.
 
