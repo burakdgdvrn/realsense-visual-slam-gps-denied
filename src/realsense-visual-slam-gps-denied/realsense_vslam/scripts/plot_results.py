@@ -293,6 +293,120 @@ def plot_yaw_error(ax, data, events):
     ax.grid(True)
 
 
+def compute_baseline_trajectory(data):
+    """Baseline hesaplama: Switcher kapalıyken (GPS-only) GPS kesilince pozisyon donar.
+    Bu, 'VO olmasaydı ne olurdu?' sorusunun yanıtıdır."""
+    baseline_x = []
+    baseline_y = []
+    baseline_ate = []
+    last_gps_x = data['gps_x'][0]
+    last_gps_y = data['gps_y'][0]
+
+    for i in range(len(data['mode'])):
+        if data['mode'][i] == 'GPS':
+            # GPS aktif — normal GPS pozisyonunu kullan
+            last_gps_x = data['gps_x'][i]
+            last_gps_y = data['gps_y'][i]
+            baseline_x.append(data['gps_x'][i])
+            baseline_y.append(data['gps_y'][i])
+        else:
+            # GPS kesik (VO veya RECOVERY) — son GPS pozisyonunda DON
+            baseline_x.append(last_gps_x)
+            baseline_y.append(last_gps_y)
+
+        # Baseline ATE hesapla
+        gt_x = data['gt_x'][i]
+        gt_y = data['gt_y'][i]
+        ate = math.sqrt((baseline_x[-1] - gt_x)**2 + (baseline_y[-1] - gt_y)**2)
+        baseline_ate.append(ate)
+
+    return baseline_x, baseline_y, baseline_ate
+
+
+def plot_ablation_trajectory(ax, data, events):
+    """Ablation Grafiği: Switcher ON vs OFF yörünge karşılaştırması"""
+    baseline_x, baseline_y, _ = compute_baseline_trajectory(data)
+
+    # Ground Truth
+    ax.plot(data['gt_x'], data['gt_y'], color='#ffffff', linewidth=1.5,
+            alpha=0.4, linestyle='--', label='Ground Truth', zorder=2)
+
+    # Baseline (Switcher OFF) — GPS kesilince donuyor
+    ax.plot(baseline_x, baseline_y, color='#ff6b6b', linewidth=2,
+            alpha=0.8, label='Baseline (Switcher OFF)', zorder=3)
+
+    # Switcher ON — fused trajectory
+    ax.plot(data['fused_x'], data['fused_y'], color='#51cf66', linewidth=2,
+            alpha=0.8, label='Switcher ON (GPS/VO)', zorder=4)
+
+    # GPS kesinti bölgelerindeki donma noktalarını vurgula
+    freeze_points_x = []
+    freeze_points_y = []
+    for i in range(1, len(data['mode'])):
+        if data['mode'][i] != 'GPS' and data['mode'][i-1] == 'GPS':
+            freeze_points_x.append(baseline_x[i])
+            freeze_points_y.append(baseline_y[i])
+    if freeze_points_x:
+        ax.scatter(freeze_points_x, freeze_points_y, c='#ff6b6b', s=100,
+                   marker='X', zorder=5, label='GPS Lost (Frozen)', edgecolors='white', linewidths=1.5)
+
+    # Başlangıç ve bitiş
+    ax.scatter(data['fused_x'][0], data['fused_y'][0], c='#00ff88', s=120,
+               marker='^', zorder=6, label='Start', edgecolors='white', linewidths=1.5)
+    ax.scatter(data['fused_x'][-1], data['fused_y'][-1], c='#ffd43b', s=120,
+               marker='s', zorder=6, label='End', edgecolors='white', linewidths=1.5)
+
+    ax.set_xlabel('X Position (m)')
+    ax.set_ylabel('Y Position (m)')
+    ax.set_title('Ablation Study: Switcher ON vs OFF — Trajectory Comparison')
+    ax.legend(loc='best', fontsize=9, facecolor='#1a1a2e', edgecolor=GRID_COLOR)
+    ax.set_aspect('equal')
+    ax.grid(True)
+
+
+def plot_ablation_ate(ax, data, events):
+    """Ablation ATE Karşılaştırması: Switcher ON vs Baseline ATE zaman serisi"""
+    t = data['timestamp']
+    _, _, baseline_ate = compute_baseline_trajectory(data)
+    fused_ate = data['ate_fused']
+    modes = data['mode']
+
+    ax.plot(t, baseline_ate, color='#ff6b6b', linewidth=1.5, alpha=0.8,
+            label='Baseline (Switcher OFF)')
+    ax.plot(t, fused_ate, color='#51cf66', linewidth=1.5, alpha=0.8,
+            label='Switcher ON (GPS/VO)')
+
+    add_gps_loss_zones(ax, events, alpha=0.2)
+
+    # VO bölgelerinde ortalama ATE karşılaştırması
+    vo_idx = [i for i, m in enumerate(modes) if m in ('VO', 'RECOVERY')]
+    if vo_idx:
+        vo_baseline_ate = [baseline_ate[i] for i in vo_idx]
+        vo_fused_ate = [fused_ate[i] for i in vo_idx]
+        avg_baseline = sum(vo_baseline_ate) / len(vo_baseline_ate)
+        avg_fused = sum(vo_fused_ate) / len(vo_fused_ate)
+        improvement = ((avg_baseline - avg_fused) / avg_baseline) * 100 if avg_baseline > 0 else 0
+
+        ax.axhline(y=avg_baseline, color='#ff6b6b', linestyle=':', alpha=0.6,
+                   label=f'Baseline Mean (outage): {avg_baseline:.2f}m')
+        ax.axhline(y=avg_fused, color='#51cf66', linestyle=':', alpha=0.6,
+                   label=f'Switcher Mean (outage): {avg_fused:.2f}m')
+
+        # İyileşme yüzdesi
+        ax.annotate(f'ATE Improvement: {improvement:.1f}%\n'
+                    f'Baseline: {avg_baseline:.2f}m → Switcher: {avg_fused:.2f}m',
+                    xy=(0.98, 0.95), xycoords='axes fraction',
+                    ha='right', va='top', fontsize=10, color='#ffd43b',
+                    bbox=dict(boxstyle='round,pad=0.4', facecolor='#1a1a2e',
+                              edgecolor='#ffd43b', alpha=0.9))
+
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('ATE (m)')
+    ax.set_title('Ablation Study: ATE Comparison — Switcher ON vs OFF')
+    ax.legend(loc='upper left', fontsize=8, facecolor='#1a1a2e', edgecolor=GRID_COLOR)
+    ax.grid(True)
+
+
 def plot_statistics_table(ax, data, events):
     """Grafik 7: İstatistik özet tablosu"""
     modes = data['mode']
@@ -447,6 +561,37 @@ def main():
     output_path = os.path.join(results_dir, f'test_results_{timestamp}.png')
     fig.savefig(output_path, dpi=150, bbox_inches='tight')
     print(f'✅ Ana grafik kaydedildi: {output_path}')
+
+    # --- ABLATION GRAFİKLERİ (tezin ana figürü) ---
+    has_vo = any(m in ('VO', 'RECOVERY') for m in data['mode'])
+    if has_vo:
+        # Ablation Figür: Trajectory + ATE yan yana
+        fig_abl, (ax_abl1, ax_abl2) = plt.subplots(1, 2, figsize=(22, 9))
+        setup_style()
+        fig_abl.suptitle('Ablation Study: GPS/VO Switcher ON vs OFF', fontsize=16, y=0.98)
+        plot_ablation_trajectory(ax_abl1, data, events)
+        plot_ablation_ate(ax_abl2, data, events)
+
+        abl_path = os.path.join(results_dir, f'ablation_{timestamp}.png')
+        fig_abl.savefig(abl_path, dpi=200, bbox_inches='tight')
+        print(f'✅ Ablation grafiği kaydedildi: {abl_path}')
+
+        # Ayrı ayrı da kaydet (tez için)
+        fig_abl_t, ax_abl_t = plt.subplots(figsize=(12, 9))
+        setup_style()
+        plot_ablation_trajectory(ax_abl_t, data, events)
+        fig_abl_t.savefig(os.path.join(results_dir, f'ablation_trajectory_{timestamp}.png'), dpi=200, bbox_inches='tight')
+
+        fig_abl_a, ax_abl_a = plt.subplots(figsize=(14, 6))
+        setup_style()
+        plot_ablation_ate(ax_abl_a, data, events)
+        fig_abl_a.savefig(os.path.join(results_dir, f'ablation_ate_{timestamp}.png'), dpi=200, bbox_inches='tight')
+
+        print(f'✅ Ayrı ablation grafikleri kaydedildi:')
+        print(f'   ablation_trajectory_{timestamp}.png')
+        print(f'   ablation_ate_{timestamp}.png')
+    else:
+        print(f'⚠️  Bu run\'da VO/RECOVERY modu yok — ablation grafiği üretilmedi.')
 
     # --- AYRI BÜYÜK GRAFİKLER (tez için yüksek çözünürlük) ---
     separate_plots = [
