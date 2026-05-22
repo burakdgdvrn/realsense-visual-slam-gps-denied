@@ -1,56 +1,74 @@
-# 🛰️ Evaluation of Visual Odometry Fallback for Leader-Follower Drone Formations in Kinematic GPS-Denied Simulations
+# Evaluation of Visual Odometry Fallback for Leader-Follower UAV Formations in Kinematic GPS-Denied Simulations
 
-> **Graduation Thesis Project** — Hybrid Localization Strategy for Kinematic UAV Leader-Follower Formations under Simulated GPS Outages.
+> **Graduation Thesis Project** — GPS/Visual Odometry Switching with Smooth Recovery for Leader-Follower UAV Formations under Simulated GPS Outage Conditions.
 
 [![ROS2](https://img.shields.io/badge/ROS2-Humble-blue)](https://docs.ros.org/en/humble/)
 [![Gazebo](https://img.shields.io/badge/Gazebo-Classic%2011-orange)](http://gazebosim.org/)
-[![RTAB-Map](https://img.shields.io/badge/RTAB--Map-SLAM-green)](http://introlab.github.io/rtabmap/)
+[![RTAB-Map](https://img.shields.io/badge/RTAB--Map-Visual%20Odometry-green)](http://introlab.github.io/rtabmap/)
 [![Python](https://img.shields.io/badge/Python-3.10-yellow)](https://python.org/)
 
 ---
 
 ## 📋 Overview
 
-This project demonstrates a **hybrid localization system** for leader-follower UAV formations that seamlessly transitions between GPS-based and Vision-based localization. When a GPS signal is lost, the system automatically switches to **RTAB-Map Visual Odometry** to maintain formation geometry.
+This project implements a **priority-based localization switching node** for a leader-follower UAV formation. The system selects between two position estimation sources — GPS odometry and Visual Odometry — depending on GPS signal availability. When GPS is lost (simulated as a binary outage event), the system transitions to **RTAB-Map Frame-to-Map Visual Odometry** with coordinate frame alignment. When GPS returns, a time-based smooth recovery (bumpless transfer) is performed to avoid position discontinuities.
 
-### Key Features
+> **Architectural Note:** This system performs **sensor arbitration** (priority-based source selection), not statistical sensor fusion. Unlike Kalman filter or complementary filter approaches, the two sources are never combined simultaneously. Instead, one source is selected as the active localization input at any given time, based on GPS signal availability.
 
-- **Hybrid Localization** — Automatic GPS ↔ Visual Odometry switching with smooth recovery
-- **Leader-Follower Formation** — Master-Slave architecture with 1 master + 2 slave UAVs
-- **Simulated GPS Outage** — Real-time GPS signal loss simulator
-- **Automated Test Scenarios** — Scripted fault-injection tests with metrics recording
-- **Academic Standard Metrics** — Auto-generated trajectory plots, ATE, RPE, and Yaw error analysis
+### What This Project Does
+
+- **Priority-Based Switching** — GPS ↔ Visual Odometry source selection with coordinate frame alignment
+- **Smooth Recovery** — Time-based linear interpolation (T=2.0s) from VO back to GPS when signal returns (bumpless transfer)
+- **Leader-Follower Formation** — Geometric V-formation with 1 leader + 2 followers (rigid offset, no inter-agent communication)
+- **Simulated GPS Outage** — Binary signal loss toggler for GPS-denied scenario testing
+- **Academic Metrics** — ATE, RPE, RMSE, and yaw error recording with per-mode breakdown
+
+### What This Project Does NOT Do
+
+- ❌ Autonomous navigation (no waypoint planner, no obstacle avoidance)
+- ❌ Distributed multi-agent SLAM or cooperative localization
+- ❌ SLAM-corrected global pose feedback into the localization loop
+- ❌ Statistical sensor fusion (no Kalman filter, no complementary filter)
+- ❌ Realistic GPS error modeling (no multipath, HDOP, or satellite geometry)
+- ❌ Dynamic flight physics (kinematic simulation, no IMU/wind/vibration)
 
 ---
 
 ## 🏗️ System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        SYSTEM OVERVIEW                          │
-│                                                                 │
-│  ┌──────────────┐    ┌──────────────────┐    ┌──────────────┐  │
-│  │   Teleop /   │───▶│   Formation      │───▶│  Kinematic   │  │
-│  │  Auto Test   │    │   Controller     │    │   Physics    │  │
-│  │  (cmd_vel)   │    │  (V-formation)   │    │  (Gazebo)    │  │
-│  └──────────────┘    └──────┬───────────┘    └──────────────┘  │
-│                             │                                   │
-│                      ┌──────▼───────────┐                      │
-│                      │  GPS Broadcaster  │                      │
-│                      │  (Odom source)    │                      │
-│                      └──────┬───────────┘                      │
-│                             │                                   │
-│  ┌──────────────┐    ┌──────▼───────────┐    ┌──────────────┐  │
-│  │  GPS Jammer  │───▶│   HYBRID         │◀───│  RTAB-Map    │  │
-│  │              │    │   LOCALIZER      │    │  Visual Odom │  │
-│  └──────────────┘    │  GPS↔VO Fusion   │    │  (rgbd_odom) │  │
-│                      └──────┬───────────┘    └──────────────┘  │
-│                             │                                   │
-│                      ┌──────▼───────────┐    ┌──────────────┐  │
-│                      │   RTAB-Map SLAM  │───▶│  Metrics     │  │
-│                      │   (3D Mapping)   │    │  Recorder    │  │
-│                      └──────────────────┘    └──────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                         SYSTEM OVERVIEW                             │
+│                                                                     │
+│  ┌──────────────┐    ┌───────────────────┐    ┌──────────────────┐  │
+│  │   Teleop     │───▶│   Formation       │───▶│   Kinematic      │  │
+│  │  (cmd_vel)   │    │   Controller      │    │   Physics        │  │
+│  │              │    │  (V-formation)    │    │  (Gazebo teleport)│  │
+│  └──────────────┘    └───────┬───────────┘    └──────────────────┘  │
+│                              │                                      │
+│                       ┌──────▼───────────┐                          │
+│                       │  GPS Simulator   │                          │
+│                       │  (Noisy sensor:  │                          │
+│                       │   σ=1.5m + bias) │                          │
+│                       └──────┬───────────┘                          │
+│                              │                                      │
+│  ┌──────────────┐     ┌──────▼───────────┐    ┌──────────────────┐  │
+│  │  GPS Outage  │────▶│   GPS/VO         │◀───│  RTAB-Map        │  │
+│  │  Simulator   │     │   SWITCHER       │    │  Visual Odometry │  │
+│  │  (Bool toggle)│    │  (source select) │    │  (Frame-to-Map)  │  │
+│  └──────────────┘     └──────┬───────────┘    └──────────────────┘  │
+│                              │                                      │
+│                       ┌──────▼───────────┐                          │
+│                       │   Metrics        │                          │
+│                       │   Recorder       │                          │
+│                       │  (ATE,RPE,RMSE)  │                          │
+│                       └──────────────────┘                          │
+│                                                                     │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │  RTAB-Map SLAM (runs independently, map→odom TF only)      │   │
+│  │  Not connected to switching pipeline                        │   │
+│  └──────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -60,26 +78,24 @@ This project demonstrates a **hybrid localization system** for leader-follower U
 ```
 realsense_vslam/
 ├── scripts/
-│   ├── hybrid_localizer.py      # Core: GPS/VO fusion with smooth recovery
-│   ├── formation_controller.py  # V-formation control (state machine)
+│   ├── gps_vo_switcher.py       # Core: GPS/VO priority-based switching with smooth recovery
+│   ├── formation_controller.py  # V-formation geometry (leader-follower state machine)
 │   ├── kinematic_physics.py     # Gazebo entity positioning via SetEntityState
-│   ├── odom_broadcaster.py      # Simulated GPS odometry publisher
-│   ├── gps_jammer.py            # Interactive GPS outage simulator
-│   ├── automated_flight_test.py # 7-phase autonomous flight test
-│   ├── fault_scenario.py        # 9-phase GPS-denial fault injection test
-│   ├── metrics_recorder.py      # CSV logger for position error & mode transitions
-│   └── plot_results.py          # Thesis-quality graph generator
+│   ├── odom_broadcaster.py      # Simulated noisy GPS odometry (σ=1.5m + random walk)
+│   ├── gps_outage_sim.py        # Interactive GPS outage toggle (binary on/off)
+│   ├── metrics_recorder.py      # CSV logger: ATE, RPE, RMSE, mode transitions
+│   └── plot_results.py          # Result graph generator
 ├── launch/
 │   ├── system_bringup.launch.py # Single entry point: Gazebo + Engine + SLAM
-│   ├── single_gazebo.launch.py  # Master-only Gazebo (for solo SLAM testing)
-│   ├── master_gazebo.launch.py  # Full formation: Master + 2 Slaves
-│   ├── flight_engine.launch.py  # Core nodes: control, physics, odom, localizer, metrics
+│   ├── single_gazebo.launch.py  # Leader-only Gazebo (for solo testing)
+│   ├── master_gazebo.launch.py  # Full formation: Leader + 2 Followers
+│   ├── flight_engine.launch.py  # Core nodes: control, physics, odom, switcher, metrics
 │   └── slam_rtabmap.launch.py   # RTAB-Map VO + SLAM + Visualization
 ├── models/
-│   ├── master_uav/model.sdf     # Master drone with RGB-D depth camera
-│   └── slave_uav/model.sdf      # Slave drone (no camera, formation only)
+│   ├── master_uav/model.sdf     # Leader drone with RGB-D depth camera
+│   └── slave_uav/model.sdf      # Follower drone (no camera, formation only)
 ├── worlds/
-│   └── vslam.world              # Feature-rich ISCAS Museum environment for VO/SLAM
+│   └── vslam.world              # ISCAS Museum environment for VO feature tracking
 ├── CMakeLists.txt
 └── package.xml
 ```
@@ -113,7 +129,7 @@ source install/setup.bash
 
 ## 🚀 Usage
 
-### Quick Start (All-in-one)
+### Quick Start
 
 **Terminal 1** — Launch everything:
 ```bash
@@ -127,21 +143,9 @@ ros2 run teleop_twist_keyboard teleop_twist_keyboard \
     --ros-args -r /cmd_vel:=/master/cmd_vel
 ```
 
-**Terminal 3** — GPS Outage Simulator (press ENTER to toggle):
+**Terminal 3** — Toggle GPS outage (press ENTER):
 ```bash
-ros2 run realsense_vslam gps_jammer.py
-```
-
-### Automated Fault Scenario Test
-
-Runs a full GPS → VO → Recovery cycle automatically (no manual input needed):
-
-```bash
-# Terminal 1: Launch system
-ros2 launch realsense_vslam system_bringup.launch.py
-
-# Terminal 2: Run automated fault scenario
-ros2 run realsense_vslam fault_scenario.py
+ros2 run realsense_vslam gps_outage_sim.py
 ```
 
 ### Generate Result Graphs
@@ -150,70 +154,61 @@ ros2 run realsense_vslam fault_scenario.py
 python3 src/realsense-visual-slam-gps-denied/realsense_vslam/scripts/plot_results.py
 ```
 
-Output saved to `~/graduation_thesis/test_results/`:
-- `test_results_*.png` — Combined 4-panel result figure
-- `trajectory_*.png` — XY trajectory map
-- `position_error_*.png` — Position error time series
-- `mode_timeline_*.png` — Localization mode transitions
+Output saved to `~/graduation_thesis/test_results/`.
 
 ---
 
-## 🧠 Hybrid Localization Algorithm
+## 🧠 GPS/VO Switching Logic
 
-The `HybridLocalizer` node implements a three-mode sensor fusion strategy:
+The `GpsVoSwitcher` node implements a three-mode **priority-based source selection** strategy:
 
-| Mode | Trigger | Method |
-|------|---------|--------|
-| **GPS** | GPS signal active | Direct GPS odometry pass-through |
-| **VO** | GPS signal lost | Rotation matrix-based VO→GPS frame alignment |
-| **RECOVERY** | GPS signal restored | Linear interpolation (lerp) from VO to GPS |
+| Mode | Trigger | Source Used |
+|------|---------|-------------|
+| **GPS** | GPS signal active | GPS odometry (noisy) passed through directly |
+| **VO** | GPS signal lost | RTAB-Map Frame-to-Map VO, aligned to GPS frame via rigid body transform |
+| **RECOVERY** | GPS signal restored | Time-based interpolation from VO position to GPS position (T=2.0s) |
 
-### Frame Alignment Math (GPS → VO Transition)
+> This is **sensor arbitration**, not sensor fusion. Only one source is active at a time.
 
-When GPS is lost, the offset between GPS and VO frames is computed:
+### GPS → VO Transition (Coordinate Frame Alignment)
+
+When GPS is lost, the offset between the last known GPS position and the current VO position is computed using a 2D rigid body transformation:
 
 ```
-offset_yaw = gps_yaw - vo_yaw
+offset_yaw = atan2(sin(gps_yaw - vo_yaw), cos(gps_yaw - vo_yaw))
 offset_x = gps_x - (vo_x·cos(θ) - vo_y·sin(θ))
 offset_y = gps_y - (vo_x·sin(θ) + vo_y·cos(θ))
 ```
 
-The VO position is then transformed into the GPS frame using a 2D rigid body transformation.
+Subsequent VO frames are transformed into the GPS coordinate frame using this offset, ensuring position continuity (graceful degradation).
 
-### Smooth Recovery (VO → GPS Transition)
+### VO → GPS Recovery (Bumpless Transfer)
 
-When GPS returns, the system blends VO and GPS positions over ~2 seconds:
+When GPS returns, the system blends VO and GPS positions over 2 seconds using time-based interpolation:
 
 ```
-blended = lerp(vo_position, gps_position, α)
-α += 0.05 per step  →  100% GPS in ~20 steps
+α += dt / T    (T = 2.0 seconds, time-based increment)
+position = lerp(vo_aligned, gps_position, α)
+yaw = slerp(vo_aligned_yaw, gps_yaw, α)    # shortest-path angular interpolation
 ```
+
+This prevents position discontinuities that would occur with an instant switch.
 
 ---
 
-## 🌍 Test Environment
+## 📊 Metrics
 
-The system utilizes the **ISCAS Museum** environment for GPS-denied SLAM testing:
+The `MetricsRecorder` node records the following to timestamped CSV files:
 
-- **Rich Visual Features** — Highly textured exhibit halls, posters, and structures perfect for RTAB-Map Visual Odometry.
-- **Complex Navigation** — Provides a realistic indoor environment with corridors, open spaces, and varying lighting.
-- **Spacious Layout** — Large enough to accommodate the full V-formation flight geometry.
+| Metric | Description | Reference |
+|--------|-------------|-----------|
+| **ATE** | Euclidean distance: estimated position vs ground truth | `/formation/master_target` (ground truth) |
+| **RPE** | Translation and rotation error between consecutive frames | Frame-to-frame delta comparison |
+| **Yaw Error** | Angular deviation from ground truth orientation | Wrapped ±π difference |
+| **GPS ATE** | Euclidean distance: noisy GPS vs ground truth | Quantifies GPS noise level |
+| **Mode Transitions** | GPS → VO → RECOVERY → GPS timestamps | Event log CSV |
 
-The environment ensures RTAB-Map can extract and track robust visual features when GPS is disabled.
-
----
-
-## 📊 Metrics & Results
-
-The system records the following metrics to timestamped CSV files:
-
-| Metric | Description |
-|--------|-------------|
-| **ATE (Absolute Trajectory Error)** | Euclidean distance between fused and Ground Truth positions |
-| **RPE (Relative Pose Error)** | Error in translation and rotation between consecutive frames |
-| **Yaw Error** | Angular deviation from the ground truth orientation |
-| **Mode Transitions** | GPS → VO → RECOVERY → GPS event timestamps |
-| **Trajectory** | Full XY position trace with mode color coding |
+Per-mode statistics (GPS / VO / RECOVERY) are computed at shutdown including min, max, mean, median, RMSE, and standard deviation.
 
 ---
 
@@ -221,25 +216,39 @@ The system records the following metrics to timestamped CSV files:
 
 | Topic | Type | Publisher | Subscriber |
 |-------|------|-----------|------------|
-| `/master/cmd_vel` | `Twist` | Teleop / AutoTest | FormationController |
-| `/swarm/master_target` | `Pose` | FormationController | KinematicPhysics, OdomBroadcaster |
-| `/swarm/slave1_target` | `Pose` | FormationController | KinematicPhysics |
-| `/swarm/slave2_target` | `Pose` | FormationController | KinematicPhysics |
-| `/master/gps_odom` | `Odometry` | OdomBroadcaster | HybridLocalizer |
-| `/rtabmap/vo` | `Odometry` | rgbd_odometry | HybridLocalizer |
-| `/system/gps_status` | `Bool` | GpsJammer | HybridLocalizer |
-| `/master/odom` | `Odometry` | HybridLocalizer | RTAB-Map SLAM |
-| `/system/localization_mode` | `String` | HybridLocalizer | MetricsRecorder |
+| `/master/cmd_vel` | `Twist` | Teleop keyboard | FormationController |
+| `/formation/master_target` | `Pose` | FormationController | KinematicPhysics, OdomBroadcaster, MetricsRecorder |
+| `/formation/slave1_target` | `Pose` | FormationController | KinematicPhysics |
+| `/formation/slave2_target` | `Pose` | FormationController | KinematicPhysics |
+| `/master/gps_odom` | `Odometry` | OdomBroadcaster | GpsVoSwitcher, MetricsRecorder |
+| `/rtabmap/vo` | `Odometry` | rgbd_odometry | GpsVoSwitcher, RTAB-Map SLAM |
+| `/system/gps_status` | `Bool` | GpsOutageSim | GpsVoSwitcher, MetricsRecorder |
+| `/master/odom` | `Odometry` | GpsVoSwitcher | MetricsRecorder |
+| `/system/localization_mode` | `String` | GpsVoSwitcher | MetricsRecorder |
+
+> **Note:** `/master/odom` is consumed only by MetricsRecorder for logging. It does not feed back into any control loop or RTAB-Map.
 
 ---
 
-## 📝 Notes & Limitations
+## 📝 Limitations & Scope
 
-- This system uses a **kinematic simulation approach** for upper-level coordination validation rather than low-level flight dynamics modeling. Therefore, Visual Odometry drift may be more optimistic than in a physical environment with wind, vibration, and motion blur.
-- The drone model uses `<kinematic>1</kinematic>` with gravity disabled for deterministic positioning.
-- The term "Formation" (and legacy `/swarm/` topics) refers strictly to a **rigid leader-follower geometric coupling**, not a distributed multi-agent cooperative SLAM system.
-- Aerodynamic tilt animations are disabled to prevent SLAM map distortion.
-- The depth camera simulates an **Intel RealSense** sensor (640×480, 30 FPS, 86° FOV, 0.1-10m range).
+This section documents known limitations for academic transparency:
+
+1. **Kinematic Simulation:** Drones are positioned via `SetEntityState` (teleportation). There is no flight dynamics, IMU, wind, or vibration modeling. Consequently, VO drift results are more optimistic than a physical system would produce, since camera frames are inherently stable.
+
+2. **Simplified GPS Model:** GPS noise is modeled as additive Gaussian (σ=1.5m) with random walk bias (σ_step=0.02m per update). Real GPS errors (multipath, HDOP variation, satellite geometry) are not simulated.
+
+3. **Binary GPS Outage:** GPS loss is modeled as an instantaneous binary event (on/off). Gradual signal degradation, partial outage, or spoofing scenarios are not implemented.
+
+4. **VO Only, Not SLAM-Corrected:** The switching node uses raw Frame-to-Map Visual Odometry (`/rtabmap/vo`), not the globally optimized SLAM pose. RTAB-Map SLAM runs concurrently for mapping, but its loop closure corrections do not feed back into the localization output.
+
+5. **No Autonomous Navigation:** There is no waypoint planner, mission controller, or obstacle avoidance. Flight is controlled manually via teleop.
+
+6. **Geometric Formation Only:** Follower drones have no cameras or independent localization. They maintain position through rigid geometric offsets from the leader — this is leader-follower geometric coupling, not distributed cooperative localization.
+
+7. **No Closed-Loop Control:** The `/master/odom` output is used only for metrics recording. It does not feed back into drone flight control. In a real system, this output would be provided to the autopilot.
+
+8. **Priority-Based Switching, Not Fusion:** The system does not combine GPS and VO signals simultaneously. It selects one source at a time based on GPS availability. This is distinct from Kalman filter or complementary filter-based sensor fusion approaches.
 
 ---
 
@@ -252,4 +261,4 @@ Graduation Thesis — 2026
 
 ## 📄 License
 
-This project is developed for academic purposes as part of a graduation thesis.
+MIT License — See [LICENSE](LICENSE) for details.
