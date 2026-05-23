@@ -294,25 +294,51 @@ def plot_yaw_error(ax, data, events):
 
 
 def compute_baseline_trajectory(data):
-    """Baseline hesaplama: Switcher kapalıyken (GPS-only) GPS kesilince pozisyon donar.
-    Bu, 'VO olmasaydı ne olurdu?' sorusunun yanıtıdır."""
+    """Baseline hesaplama: Switcher kapalıyken (GPS-only) GPS kesilince ne olur?
+    Tezdeki kısıtlılıklar (IMU modellemesi olmaması) göz önüne alınarak, akademik 
+    olarak en savunulabilir yöntem olan 'Sabit Hız Modeli' (First-Order Hold) kullanılmıştır.
+    GPS koptuğunda drone, son bilinen hız vektörüyle düz bir çizgide ilerlediği varsayılır.
+    (Uydurma ivme/drift katsayıları içermez, tamamen kinematiktir.)
+    """
     baseline_x = []
     baseline_y = []
     baseline_ate = []
-    last_gps_x = data['gps_x'][0]
-    last_gps_y = data['gps_y'][0]
+    
+    vx, vy = 0.0, 0.0
+    outage_start_time = None
+    drift_start_x, drift_start_y = 0.0, 0.0
 
     for i in range(len(data['mode'])):
+        t = data['timestamp'][i]
+        
         if data['mode'][i] == 'GPS':
             # GPS aktif — normal GPS pozisyonunu kullan
-            last_gps_x = data['gps_x'][i]
-            last_gps_y = data['gps_y'][i]
             baseline_x.append(data['gps_x'][i])
             baseline_y.append(data['gps_y'][i])
+            outage_start_time = None
+            
+            # Anlık hız tahmini (son adım üzerinden)
+            if i > 0:
+                dt = t - data['timestamp'][i-1]
+                if dt > 0.01:
+                    vx = (data['gps_x'][i] - data['gps_x'][i-1]) / dt
+                    vy = (data['gps_y'][i] - data['gps_y'][i-1]) / dt
         else:
-            # GPS kesik (VO veya RECOVERY) — son GPS pozisyonunda DON
-            baseline_x.append(last_gps_x)
-            baseline_y.append(last_gps_y)
+            # GPS kesik (Switcher OFF) — Sabit Hızla Ölü Kestirim (First-Order Hold)
+            if outage_start_time is None:
+                outage_start_time = t
+                # Kesintiden önceki son geçerli konumu al
+                drift_start_x = baseline_x[-1] if len(baseline_x) > 0 else 0.0
+                drift_start_y = baseline_y[-1] if len(baseline_y) > 0 else 0.0
+                
+            dt_outage = t - outage_start_time
+            
+            # Sabit hız formülü: x = x0 + v*t (İvme/IMU yok)
+            sim_x = drift_start_x + (vx * dt_outage)
+            sim_y = drift_start_y + (vy * dt_outage)
+            
+            baseline_x.append(sim_x)
+            baseline_y.append(sim_y)
 
         # Baseline ATE hesapla
         gt_x = data['gt_x'][i]
