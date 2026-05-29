@@ -29,12 +29,8 @@ class KinematicPhysics(Node):
         v_yaw = pose_msg.orientation.y
         yaw = pose_msg.orientation.w
         
-        # Aerodinamik Animasyon (İptal edildi, çünkü kameranın haritayı eğik çıkarmasına sebep oluyor)
+        # Aerodinamik Animasyon iptal edildi (Kamera haritayı eğik çıkarıyor).
         pitch, roll = 0.0, 0.0
-        # if v_x > 0.1: pitch = 0.15
-        # elif v_x < -0.1: pitch = -0.15
-        # if v_yaw > 0.1: roll = -0.15
-        # elif v_yaw < -0.1: roll = 0.15
 
         req = SetEntityState.Request()
         req.state.name = name
@@ -47,7 +43,16 @@ class KinematicPhysics(Node):
         req.state.pose.orientation.y = qy
         req.state.pose.orientation.z = qz
         req.state.pose.orientation.w = qw
-        self.cli.call_async(req)
+        future = self.cli.call_async(req)
+        future.add_done_callback(lambda f: self.handle_service_response(f, name))
+
+    def handle_service_response(self, future, name):
+        try:
+            response = future.result()
+            if not response.success:
+                self.get_logger().error(f'Gazebo fizik servisi basarisiz oldu ({name}): {response.status_message}')
+        except Exception as e:
+            self.get_logger().error(f'Gazebo servisi cagrilirken hata olustu ({name}): {e}')
 
     def master_cb(self, msg): self.move_drone('master_uav', msg)
     def s1_cb(self, msg): self.move_drone('slave_uav_1', msg)

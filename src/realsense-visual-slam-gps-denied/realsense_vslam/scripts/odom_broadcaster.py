@@ -30,6 +30,11 @@ class GpsBroadcaster(Node):
         odom.header.frame_id = 'odom'
         odom.child_frame_id = 'base_link'
 
+        # Kovaryans ataması (Hocanın tavsiyesi: x, y için 1.5^2, yaw için 0.05)
+        odom.pose.covariance[0]  = 1.5 ** 2   # x variance
+        odom.pose.covariance[7]  = 1.5 ** 2   # y variance
+        odom.pose.covariance[35] = 0.05       # yaw variance (placeholder)
+
         # 1. Random Walk Bias (Zamanla artan kayma)
         # Saniyede yaklaşık ~10 mesaj gelse, yavaş yavaş kayarak 3-4 metrelere ulaşır.
         self.bias_x += random.gauss(0.0, 0.02)

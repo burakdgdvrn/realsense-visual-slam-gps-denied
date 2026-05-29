@@ -205,7 +205,7 @@ class MetricsRecorder(Node):
             if self.master_pose is not None:
                 gt_x = self.master_pose.position.x
                 gt_y = self.master_pose.position.y
-                gt_yaw = self.get_yaw(self.master_pose.orientation)
+                gt_yaw = self.master_pose.orientation.w
                 ate_fused = math.sqrt((fp.x - gt_x)**2 + (fp.y - gt_y)**2)
                 yaw_error = abs(self.angle_diff(fused_yaw, gt_yaw))
 

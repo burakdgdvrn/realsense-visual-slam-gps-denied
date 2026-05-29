@@ -144,16 +144,16 @@ def plot_trajectory(ax, data):
         idx = [i for i, m in enumerate(modes) if m == mode]
         if idx:
             ax.scatter([fx[i] for i in idx], [fy[i] for i in idx],
-                      c=color, s=8, alpha=0.7, label=f'Tahmin ({mode})', zorder=3)
+                      c=color, s=8, alpha=0.7, label=f'Estimate ({mode})', zorder=3)
 
     ax.plot(gx, gy, color='#ffffff', linewidth=1, alpha=0.3, linestyle='--', label='Ground Truth')
 
-    ax.scatter(fx[0], fy[0], c='#00ff88', s=120, marker='^', zorder=5, label='Başlangıç', edgecolors='white', linewidths=1.5)
-    ax.scatter(fx[-1], fy[-1], c='#ff4444', s=120, marker='s', zorder=5, label='Bitiş', edgecolors='white', linewidths=1.5)
+    ax.scatter(fx[0], fy[0], c='#00ff88', s=120, marker='^', zorder=5, label='Start', edgecolors='white', linewidths=1.5)
+    ax.scatter(fx[-1], fy[-1], c='#ff4444', s=120, marker='s', zorder=5, label='End', edgecolors='white', linewidths=1.5)
 
-    ax.set_xlabel('X Pozisyon (m)')
-    ax.set_ylabel('Y Pozisyon (m)')
-    ax.set_title('Drone Yörünge Haritası (XY)')
+    ax.set_xlabel('X Position (m)')
+    ax.set_ylabel('Y Position (m)')
+    ax.set_title('Drone Trajectory Map (XY)')
     ax.legend(loc='best', fontsize=8, facecolor='#1a1a2e', edgecolor=GRID_COLOR)
     ax.set_aspect('equal')
     ax.grid(True)
@@ -172,7 +172,7 @@ def plot_ate(ax, data, events):
         idx = [i for i, m in enumerate(modes) if m == mode]
         if idx:
             ax.scatter([t[i] for i in idx], [err_fused[i] for i in idx],
-                      c=color, s=4, alpha=0.8, label=f'Tahmin ATE ({mode})')
+                      c=color, s=4, alpha=0.8, label=f'Estimate ATE ({mode})')
 
     add_gps_loss_zones(ax, events)
 
@@ -185,7 +185,7 @@ def plot_ate(ax, data, events):
             ax.axhline(y=avg_err, color=color, linestyle=':', alpha=0.5,
                        label=f'{mode} Mean: {avg_err:.3f}m, RMSE: {rmse:.3f}m')
 
-    ax.set_xlabel('Zaman (s)')
+    ax.set_xlabel('Time (s)')
     ax.set_ylabel('ATE (m)')
     ax.set_title('Absolute Trajectory Error (ATE)')
     ax.legend(loc='upper left', fontsize=7, facecolor='#1a1a2e', edgecolor=GRID_COLOR)
@@ -213,7 +213,7 @@ def plot_rpe(ax, data, events):
         ax.axhline(y=avg, color='#e74c3c', linestyle=':', alpha=0.7,
                    label=f'VO Mean RPE: {avg:.4f}m')
 
-    ax.set_xlabel('Zaman (s)')
+    ax.set_xlabel('Time (s)')
     ax.set_ylabel('RPE Translation (m)')
     ax.set_title('Relative Pose Error (RPE) — Translation')
     ax.legend(loc='upper left', fontsize=8, facecolor='#1a1a2e', edgecolor=GRID_COLOR)
@@ -236,14 +236,14 @@ def plot_mode_timeline(ax, data, events):
     add_gps_loss_zones(ax, events, alpha=0.2)
 
     ax.set_yticks([0, 1, 2])
-    ax.set_yticklabels(['Visual\nOdometry', 'Recovery\n(Geçiş)', 'GPS\nAktif'])
-    ax.set_xlabel('Zaman (s)')
-    ax.set_title('Konumlandırma Modu Zaman Çizelgesi')
+    ax.set_yticklabels(['Visual\nOdometry', 'Recovery\n(Transition)', 'GPS\nActive'])
+    ax.set_xlabel('Time (s)')
+    ax.set_title('Localization Mode Timeline')
     ax.set_ylim(-0.5, 2.5)
     ax.grid(True, axis='x')
 
     gps_lost_count = sum(1 for e in events if e['type'] == 'GPS_LOST')
-    ax.text(0.98, 0.95, f'GPS Kesinti: {gps_lost_count}x',
+    ax.text(0.98, 0.95, f'GPS Outage: {gps_lost_count}x',
             transform=ax.transAxes, ha='right', va='top',
             fontsize=10, color='#e74c3c',
             bbox=dict(boxstyle='round,pad=0.3', facecolor='#1a1a2e', edgecolor='#e74c3c'))
@@ -256,15 +256,15 @@ def plot_xy_comparison(ax, data, events):
     gx, gy = data['gt_x'], data['gt_y']
 
     ax.plot(t, gx, color='#2ecc71', linewidth=1, alpha=0.6, label='Ground Truth X')
-    ax.plot(t, fx, color='#e74c3c', linewidth=1, alpha=0.8, label='Tahmin X')
+    ax.plot(t, fx, color='#e74c3c', linewidth=1, alpha=0.8, label='Estimate X')
     ax.plot(t, gy, color='#27ae60', linewidth=1, alpha=0.6, linestyle='--', label='Ground Truth Y')
-    ax.plot(t, fy, color='#c0392b', linewidth=1, alpha=0.8, linestyle='--', label='Tahmin Y')
+    ax.plot(t, fy, color='#c0392b', linewidth=1, alpha=0.8, linestyle='--', label='Estimate Y')
 
     add_gps_loss_zones(ax, events)
 
-    ax.set_xlabel('Zaman (s)')
-    ax.set_ylabel('Pozisyon (m)')
-    ax.set_title('Ground Truth vs Tahmin Pozisyon Karşılaştırması')
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Position (m)')
+    ax.set_title('Ground Truth vs Estimate Position Comparison')
     ax.legend(loc='best', fontsize=8, facecolor='#1a1a2e', edgecolor=GRID_COLOR)
     ax.grid(True)
 
@@ -286,9 +286,9 @@ def plot_yaw_error(ax, data, events):
 
     add_gps_loss_zones(ax, events)
 
-    ax.set_xlabel('Zaman (s)')
+    ax.set_xlabel('Time (s)')
     ax.set_ylabel('Yaw Error (°)')
-    ax.set_title('Açısal (Yaw) Hata')
+    ax.set_title('Angular (Yaw) Error')
     ax.legend(loc='upper left', fontsize=8, facecolor='#1a1a2e', edgecolor=GRID_COLOR)
     ax.grid(True)
 
@@ -496,7 +496,7 @@ def plot_statistics_table(ax, data, events):
                 if mode_val in COLORS:
                     table.get_celld()[(row, 1)].set_text_props(color=COLORS[mode_val])
 
-    ax.set_title('Akademik Metrik Özet Tablosu', fontsize=14, fontweight='bold', pad=20)
+    ax.set_title('Academic Metric Summary Table', fontsize=14, fontweight='bold', pad=20)
 
 
 def generate_summary_text(data, events):
@@ -520,9 +520,9 @@ def generate_summary_text(data, events):
 
     gps_lost = sum(1 for e in events if e['type'] == 'GPS_LOST')
 
-    return (f'Toplam: {total} kayıt | GPS: {gps_count} ({100*gps_count/total:.0f}%) | '
+    return (f'Total: {total} records | GPS: {gps_count} ({100*gps_count/total:.0f}%) | '
             f'VO: {vo_count} ({100*vo_count/total:.0f}%) | Recovery: {rec_count} ({100*rec_count/total:.0f}%)\n'
-            f'GPS Kesinti: {gps_lost}x | VO ATE — Mean: {avg_ate:.3f}m, RMSE: {rmse_ate:.3f}m, Max: {max_ate:.3f}m | '
+            f'GPS Outage: {gps_lost}x | VO ATE — Mean: {avg_ate:.3f}m, RMSE: {rmse_ate:.3f}m, Max: {max_ate:.3f}m | '
             f'VO RPE Mean: {avg_rpe:.4f}m')
 
 
@@ -556,7 +556,7 @@ def main():
 
     # --- ANA FİGÜR: 6 grafik + 1 tablo ---
     fig = plt.figure(figsize=(20, 24))
-    fig.suptitle('GPS/VO Anahtarlamalı Lokalizasyon — Akademik Test Sonuçları', y=0.98, fontsize=18)
+    fig.suptitle('GPS/VO Switching Localization — Academic Test Results', y=0.98, fontsize=18)
 
     # 3x2 grid + alt kısımda tablo
     gs = fig.add_gridspec(4, 2, hspace=0.35, wspace=0.3,

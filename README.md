@@ -34,6 +34,16 @@ This project implements a **priority-based localization switching node** for a l
 
 ---
 
+## 🎯 Contributions
+
+1. **Sensor Arbitration Module**: Design and implementation of a priority-based GPS/VO switching node (`GpsVoSwitcher`) that selects the active localization source based on GPS signal availability, with coordinate frame alignment via rigid body transformation at transition points.
+2. **Bumpless Transfer Mechanism**: Time-based linear interpolation (T=2.0s) for smooth VO→GPS recovery that prevents position discontinuities during source transitions, using shortest-path angular interpolation for yaw.
+3. **Empirical Validation**: Quantitative evaluation of the switching system under simulated GPS outage scenarios using standard academic metrics (ATE, RPE, RMSE) with per-mode breakdown, including ablation comparison against a no-fallback baseline.
+
+> **Note:** The 2D rigid body transformation used for GPS↔VO coordinate frame alignment is a standard mathematical operation and is documented in the Methodology section, not listed as a contribution.
+
+---
+
 ## 🏗️ System Architecture
 
 ```
@@ -154,6 +164,8 @@ ros2 run realsense_vslam gps_outage_sim.py
 python3 src/realsense-visual-slam-gps-denied/realsense_vslam/scripts/plot_results.py
 ```
 
+> **Note:** `plot_results.py` is a standalone analysis script. It is not installed via CMake and cannot be executed using `ros2 run`. It must be run directly using `python3` as shown above.
+
 Output saved to `~/graduation_thesis/test_results/`.
 
 ---
@@ -210,6 +222,16 @@ The `MetricsRecorder` node records the following to timestamped CSV files:
 
 Per-mode statistics (GPS / VO / RECOVERY) are computed at shutdown including min, max, mean, median, RMSE, and standard deviation.
 
+### VO RPE Benchmark Context
+
+The observed VO RPE values (0.11–0.22 m mean translational RPE) fall within the upper range of results reported for the EuRoC MAV benchmark using visual odometry methods (typically 0.02–0.15 m for state-of-the-art VO/VIO pipelines). However, direct comparison requires noting two important caveats: (1) our system operates in **kinematic simulation** where camera frames are inherently stable — there is no physical vibration, aerodynamic disturbance, or motion blur that would degrade feature tracking in physical flight, producing more optimistic RPE values; (2) the KITTI autonomous driving benchmark (0.5–2.0 m RPE at automotive scale) is not directly comparable due to fundamental differences in operating scale and sensor configuration. The RPE values reported here should therefore be interpreted as a **lower bound** of what would be expected in physical deployment.
+
+### VO Mode ATE Interpretation
+
+The VO mode exhibits a high mean ATE (~3.36 m) with a remarkably low standard deviation (~0.065 m). This pattern requires careful interpretation: the **high mean** reflects the inherited GPS offset at the moment of GPS→VO transition — the rigid body transform aligns VO output to the last known GPS position, which itself carries approximately 2.5 m of GPS noise error (σ=1.5m Gaussian + random walk bias). The **low standard deviation** indicates that VO produces internally consistent frame-to-frame position estimates with minimal drift over the observation window.
+
+This stability is partially attributable to the kinematic simulation environment, where camera frames are free from physical vibration, aerodynamic turbulence, and motion blur. The 0.065 m standard deviation therefore measures the **offset computation stability** (consistency of the coordinate frame alignment), not cumulative VO drift. In a physical system with real flight dynamics, this value would be expected to grow over time as VO accumulates drift from imperfect feature tracking.
+
 ---
 
 ## 🛠️ ROS 2 Topic Map
@@ -249,6 +271,8 @@ This section documents known limitations for academic transparency:
 7. **No Closed-Loop Control:** The `/master/odom` output is used only for metrics recording. It does not feed back into drone flight control. In a real system, this output would be provided to the autopilot.
 
 8. **Priority-Based Switching, Not Fusion:** The system does not combine GPS and VO signals simultaneously. It selects one source at a time based on GPS availability. This is distinct from Kalman filter or complementary filter-based sensor fusion approaches.
+
+9. **Build System Mismatch:** The package contains purely Python scripts but utilizes the `ament_cmake` build system instead of `ament_python`. While functional for this simulation, production deployment should refactor the package structure to correctly utilize `setup.py` and `setup.cfg`.
 
 ---
 

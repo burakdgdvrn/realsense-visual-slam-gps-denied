@@ -1,0 +1,16 @@
+
+digraph G {
+    rankdir=LR;
+    node [shape=box, style=filled, fillcolor=lightblue, fontname="Arial"];
+    
+    FormationController -> KinematicPhysics [label="Velocity cmds"];
+    KinematicPhysics -> GpsBroadcaster [label="Ground Truth"];
+    KinematicPhysics -> RTABMap [label="Camera Feeds"];
+    
+    GpsBroadcaster -> GpsVoSwitcher [label="Noisy GPS"];
+    RTABMap -> GpsVoSwitcher [label="Visual Odometry"];
+    
+    GpsOutageSim -> GpsVoSwitcher [label="GPS Status (Boolean)"];
+    
+    GpsVoSwitcher -> MetricsRecorder [label="Active Odometry"];
+}
